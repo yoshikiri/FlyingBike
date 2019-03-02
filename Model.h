@@ -1,15 +1,18 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <iostream>
-#include <vector>
-
 #include "Mesh.h"
 
-#include <assimp/cimport.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+namespace std {
+template <class T> struct less;
+template <class T1, class T2> struct pair;
+template <class T> class allocator;
+template <class T, class Allocator> class vector;
+}
 
 
 class Model {

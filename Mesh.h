@@ -1,14 +1,14 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include <vector>
-
 #include "Shader.h"
+
+namespace std {
+template <class T> struct less;
+template <class T1, class T2> struct pair;
+template <class T> class allocator;
+template <class T, class Allocator> class vector;
+} // namespace std
 
 struct VertexForMesh {
   glm::vec3 position;

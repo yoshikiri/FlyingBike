@@ -19,10 +19,9 @@ public:
 
   void use() { glUseProgram(program); }
 
+  // set bool value for "name" attribute in vertex shader
   void setBool(const std::string &name, bool value) const {
     glUniform1i(glGetUniformLocation(program, name.c_str()), value);
-    // const GLint location(glGetUniformLocation(program, "modelview"));
-    // glUniformMatrix4fv(modelviewLoc, 1, GL_FALSE, modelview.data());
   }
 
   void setInt(const std::string &name, int value) const {

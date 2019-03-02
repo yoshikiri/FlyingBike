@@ -1,6 +1,9 @@
 #include "Model.h"
 
+#include <iostream>
+#include <vector>
 #include <stb_image.h>
+
 
 unsigned int loadTexture(std::string filename, bool rgbaFlag = false) {
   int WIDTH, HEIGHT, nrChannels;

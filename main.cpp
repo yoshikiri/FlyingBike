@@ -6,11 +6,9 @@
 #include <stb_image.h>
 
 #include "DrawFigure.h"
-#include "Mesh.h"
 #include "Model.h"
 #include "Shader.h"
 #include "Window.h"
-
 
 int main() {
   //--------------------------------------------------------------------------//
@@ -72,7 +70,8 @@ int main() {
     glm::mat4 model(1.0);
     const float sc = 0.7f;
     glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(sc, sc, sc));
-    glm::mat4 trans = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -8.5f, 0.0f));
+    glm::mat4 trans =
+        glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -8.0f, 0.0f));
     model = scale * trans;
     glm::mat4 view(glm::lookAt(glm::vec3(1.0f, 0.5f, 2.0f),
                                glm::vec3(0.0f, 0.0f, 0.0f),
