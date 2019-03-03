@@ -188,7 +188,8 @@ int main() {
     // shader.setMat4("model", model);
     // shader.setMat4("view", view);
     // shader.setMat4("projection", projection);
-    glm::vec3 pos(3 * cos(t), 3 * sin(t), 0);
+    double radius = 2;
+    glm::vec3 pos(radius * cos(glfwGetTime()), radius * sin(glfwGetTime()), 0);
 
     lightingShader.use();
     lightingShader.setMat4("model", model);
@@ -203,8 +204,11 @@ int main() {
     lightingShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
     lightingShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
     lightingShader.setFloat("material.shininess", 32.0f);
-    lightingShader.setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    lightingShader.setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    // lightingShader.setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    glm::vec3 lightColor(sin(glfwGetTime() * 2.0), sin(glfwGetTime() * 1.0), sin(glfwGetTime() * 2.5));
+    lightingShader.setVec3("light.ambient", lightColor *  glm::vec3(0.5));
+    // lightingShader.setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    lightingShader.setVec3("light.diffuse", lightColor * glm::vec3(0.2));
     lightingShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     // 描画処理
