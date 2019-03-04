@@ -97,6 +97,7 @@ int main() {
   unsigned int specularMap = loadTextureM("resource/container2_specular.png", true);
 
   std::vector<std::string> faces = {"resource/skybox/right.jpg", "resource/skybox/left.jpg", "resource/skybox/top.jpg", "resource/skybox/bottom.jpg", "resource/skybox/front.jpg", "resource/skybox/back.jpg"};
+  // std::vector<std::string> faces = {"resource/skybox/right.jpg", "resource/skybox/left.jpg", "resource/skybox/top.jpg", "resource/skybox/bottom.jpg", "resource/skybox/front.jpg", "resource/skybox/back.jpg"};
   unsigned int cubeMap = loadCubeMap(faces);
 
   glm::vec3 lampPos(1.2f, 1.0f, 1.0f);
