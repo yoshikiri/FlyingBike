@@ -34,8 +34,8 @@ public:
       circleVertex[i + 7] = 0.0f;
     }
 
-    Figure circle(GL_TRIANGLE_FAN, vertexCount, circleVertex);
-    circle.draw();
+    // Figure circle(GL_TRIANGLE_FAN, vertexCount, circleVertex);
+    // circle.draw();
   }
 
   static void drawArrow(glm::vec3 center, glm::vec3 direction) {
@@ -50,8 +50,8 @@ public:
         p2.x, p2.y, p2.z, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f,   // left
         p3.x, p3.y, p3.z, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f};  // right
 
-    Figure triangle(GL_TRIANGLES, 3, triangleVertex);
-    triangle.draw();
+    // Figure triangle(GL_TRIANGLES, 3, triangleVertex);
+    // triangle.draw();
   }
 
   static void drawRectangle(glm::vec3 center, float width, float height) {
@@ -88,8 +88,8 @@ public:
                                0.0f,
                                0.0f};
 
-    Figure rectangle(GL_LINE_LOOP, 4, rectangleVertex);
-    rectangle.draw();
+    // Figure rectangle(GL_LINE_LOOP, 4, rectangleVertex);
+    // rectangle.draw();
   }
 
   static void drawCube(glm::vec3 center, glm::vec3 length, float color,
@@ -174,11 +174,11 @@ public:
                                         2, 6, 3, 7, 4, 5, 5, 6, 6, 7, 7, 4};
 
   if (isSolid) {
-    Figure cube(GL_TRIANGLES, 8, cubeVertex, 36, solidCubeIndex);
-    cube.draw();
+    // Figure cube(GL_TRIANGLES, 8, cubeVertex, 36, solidCubeIndex);
+    // cube.draw();
   } else {
-    Figure cube(GL_LINES, 8, cubeVertex, 24, wireCubeIndex);
-    cube.draw();
+    // Figure cube(GL_LINES, 8, cubeVertex, 24, wireCubeIndex);
+    // cube.draw();
   }
 }
 

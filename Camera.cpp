@@ -4,7 +4,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float width,
                float height, bool isPerspective)
     : position(position), target(target), up(up), width(width), height(height) {
 
-  fovy = 20.0f;
+  fovy = 40.0f;
 
   if (isPerspective)
     projection =

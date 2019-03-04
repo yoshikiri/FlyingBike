@@ -3,55 +3,68 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <vector>
+
+struct Vertex {
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec2 textureCoords;
+};
 
 class Figure {
 public:
-  Figure(GLenum mode, unsigned int vertexCount, const float vertices[],
-         const unsigned int indexCount = 0, const unsigned int indices[] = NULL)
-      : mode(mode), vertexCount(vertexCount), indexCount(indexCount) {
+  Figure(GLenum mode, bool useNormal, bool useTexture,
+         const std::vector<Vertex> vertices,
+         const std::vector<GLuint> indices = {})
+      : mode(mode), vertices(vertices), indices(indices) {
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * vertexCount, vertices,
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(),
+                 &vertices[0], GL_STATIC_DRAW);
 
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount,
-                 indices, GL_STATIC_DRAW);
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(),
+                 &indices[0], GL_STATIC_DRAW);
 
     /* attribute変数の取り出し方を指定 */
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                          (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void *)(offsetof(Vertex, position)));
     glEnableVertexAttribArray(0);
     // normal
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                          (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    if (useNormal) {
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                            (void *)(offsetof(Vertex, normal)));
+      glEnableVertexAttribArray(1);
+    }
     // TexCoord
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                          (void *)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    if (useTexture) {
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                            (void *)(offsetof(Vertex, textureCoords)));
+      glEnableVertexAttribArray(2);
+    }
   }
 
   ~Figure() {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ebo);
+    glDeleteBuffers(1, &ibo);
   }
 
   void draw() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
 
-    if (indexCount == 0) {
-      glDrawArrays(mode, 0, vertexCount);
+    if (indices.size() == 0) {
+      glDrawArrays(mode, 0, vertices.size());
     } else {
-      glDrawElements(mode, indexCount, GL_UNSIGNED_INT, 0);
+      glDrawElements(mode, indices.size(), GL_UNSIGNED_INT, 0);
     }
     glBindVertexArray(0);
   }
@@ -59,10 +72,11 @@ public:
 private:
   unsigned int vao;
   unsigned int vbo;
-  unsigned int ebo;
+  unsigned int ibo;
   const GLenum mode;
-  const unsigned int vertexCount;
-  const unsigned int indexCount;
+  const std::vector<Vertex> vertices;
+  const std::vector<GLuint> indices;
+  const std::vector<glm::vec2> textureCoords;
 };
 
 #endif
