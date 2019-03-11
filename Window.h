@@ -6,7 +6,7 @@
 
 class Window {
 public:
-  Window(int width = 640, int height = 480, const char *title = "Tutorial")
+  Window(int width = 800, int height = 600, const char *title = "Flying")
       : window(glfwCreateWindow(width, height, title, NULL, NULL)),
         scale(100.0f), location{0, 0} {
     if (window == NULL) {

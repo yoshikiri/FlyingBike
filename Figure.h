@@ -3,7 +3,10 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <glm/glm.hpp>
+#include <iostream>
+#include <iterator>
 #include <vector>
 
 struct Vertex {
@@ -15,8 +18,7 @@ struct Vertex {
 class Figure {
 public:
   Figure(GLenum mode, bool useNormal, bool useTexture,
-         const std::vector<Vertex> vertices,
-         const std::vector<GLuint> indices = {})
+         std::vector<Vertex> vertices, std::vector<GLuint> indices = {})
       : mode(mode), vertices(vertices), indices(indices) {
 
     glGenVertexArrays(1, &vao);
@@ -51,6 +53,18 @@ public:
     }
   }
 
+  // // コピーコンストラクタ
+  // Figure(const Figure &f) : vao(f.vao), vbo(f.vbo), ibo(f.ibo), mode(f.mode) {
+  //   // std::cout << "/* copy */" << '\n';
+  //   vertices.resize(f.vertices.size());
+  //   indices.resize(f.indices.size());
+  //   textureCoords.resize(f.textureCoords.size());
+  //   copy(f.vertices.begin(), f.vertices.end(), back_inserter(vertices));
+  //   copy(f.indices.begin(), f.indices.end(), back_inserter(vertices));
+  //   copy(f.textureCoords.begin(), f.textureCoords.end(),
+  //        back_inserter(vertices));
+  // }
+
   ~Figure() {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
@@ -74,9 +88,9 @@ private:
   unsigned int vbo;
   unsigned int ibo;
   const GLenum mode;
-  const std::vector<Vertex> vertices;
-  const std::vector<GLuint> indices;
-  const std::vector<glm::vec2> textureCoords;
+  std::vector<Vertex> vertices;
+  std::vector<GLuint> indices;
+  std::vector<glm::vec2> textureCoords;
 };
 
 #endif

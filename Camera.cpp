@@ -9,6 +9,9 @@ Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float width,
   if (isPerspective)
     projection =
         glm::perspective(glm::radians(fovy), width / height, 0.1f, 100.0f);
+  else
+    projection = glm::ortho(-width, width, -height, height, 0.1f, 1000.0f);
+    // projection = glm::ortho(-40.0f, 40.0f, -30.0f, 30.0f);
   view = glm::lookAt(position, target, up);
 }
 
