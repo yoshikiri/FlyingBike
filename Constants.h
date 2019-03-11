@@ -1,3 +1,6 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
 namespace Constants{
   const float VERTICES_CUBE_FLOAT[] = {
          // positions          // normals           // texture coords
@@ -89,6 +92,19 @@ namespace Constants{
        1.0f, -1.0f,  1.0f
   };
 
+  const float VERTICES_PLANE_FLOAT[] = {
+      // positions          // normals          // texture coords
+      0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top right
+      0.5f,  -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bottom right
+      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f  // top left
+  };
+
+  const unsigned int INDICES_PLANE_UNIT[] = {
+      0, 1, 3, // first triangle
+      1, 2, 3  // second triangle
+  };
+
    const unsigned int INDICES_CUBE_UINT[] = {
        0, 1, 2, 0, 2, 3, //
        0, 1, 5, 0, 5, 4, //
@@ -98,3 +114,5 @@ namespace Constants{
        4, 5, 6, 4, 6, 7,
    };
 }
+
+#endif

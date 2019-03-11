@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Constants.h"
 #include "Figure.h"
 
 class DrawFigure {
@@ -46,12 +47,43 @@ public:
     glm::vec3 p3 = center + normal / 4.0f;
 
     const float triangleVertex[] = {
-        p1.x, p1.y, p1.z, 0.2f, 0.2f, 0.5f, 0.0f, 0.0f,   // top
-        p2.x, p2.y, p2.z, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f,   // left
-        p3.x, p3.y, p3.z, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f};  // right
+        p1.x, p1.y, p1.z, 0.2f, 0.2f, 0.5f, 0.0f, 0.0f,  // top
+        p2.x, p2.y, p2.z, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f,  // left
+        p3.x, p3.y, p3.z, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f}; // right
 
     // Figure triangle(GL_TRIANGLES, 3, triangleVertex);
     // triangle.draw();
+  }
+
+  static void drawPlane(glm::vec3 center, glm::vec2 length) {
+    std::vector<Vertex> v = {
+        // top right
+        {glm::vec3(length.x / 2.0f + center.x, length.y / 2.0f + center.y,
+                   0.0f + center.z),
+         glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
+
+        // bottom right
+        {glm::vec3(length.x / 2.0f + center.x, -length.y / 2.0f + center.y,
+                   0.0f + center.z),
+         glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f)},
+
+        // bottom left
+        {glm::vec3(-length.x / 2.0f + center.x, -length.y / 2.0f + center.y,
+                   0.0f + center.z),
+         glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
+
+        // top left
+        {glm::vec3(-length.x / 2.0f + center.x, length.y / 2.0f + center.y,
+                   0.0f + center.z),
+         glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f)}};
+
+    std::vector<GLuint> i = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Figure plane(GL_TRIANGLES, true, true, v, i);
+    plane.draw();
   }
 
   static void drawRectangle(glm::vec3 center, float width, float height) {
@@ -92,96 +124,90 @@ public:
     // rectangle.draw();
   }
 
-  static void drawCube(glm::vec3 center, glm::vec3 length, float color,
-                     bool isSolid) {
-  const float cubeVertex[] = {
-      center.x - length.x / 2,
-      center.y - length.y / 2,
-      center.z - length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 0
-      center.x + length.x / 2,
-      center.y - length.y / 2,
-      center.z - length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 1
-      center.x + length.x / 2,
-      center.y + length.y / 2,
-      center.z - length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 2
-      center.x - length.x / 2,
-      center.y + length.y / 2,
-      center.z - length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 3
-      center.x - length.x / 2,
-      center.y - length.y / 2,
-      center.z + length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 4
-      center.x + length.x / 2,
-      center.y - length.y / 2,
-      center.z + length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 5
-      center.x + length.x / 2,
-      center.y + length.y / 2,
-      center.z + length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 6
-      center.x - length.x / 2,
-      center.y + length.y / 2,
-      center.z + length.z / 2,
-      color,
-      color,
-      color,
-      0.0f,
-      0.0f, // 7
-  };
+  static void drawCube(glm::vec3 center, glm::vec3 length) {
+    std::vector<Vertex> v = {
+        // positions          // normals           // texture coords
+        {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
+         glm::vec2(0.0f, 0.0f)},
+        {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
+         glm::vec2(0.0f, 0.0f)},
 
-  const unsigned int solidCubeIndex[] = {
-      0, 1, 2, 0, 2, 3, //
-      0, 1, 5, 0, 5, 4, //
-      1, 2, 6, 1, 6, 5, //
-      2, 3, 7, 2, 7, 6, //
-      3, 0, 4, 3, 4, 7, //
-      4, 5, 6, 4, 6, 7,
-  };
+        {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
+         glm::vec2(0.0f, 0.0f)},
+        {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
+         glm::vec2(0.0f, 0.0f)},
 
-  const unsigned int wireCubeIndex[] = {0, 1, 1, 2, 2, 3, 3, 0, 0, 4, 1, 5,
-                                        2, 6, 3, 7, 4, 5, 5, 6, 6, 7, 7, 4};
+        {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
+         glm::vec2(0.0f, 0.0f)},
+        {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
 
-  if (isSolid) {
-    // Figure cube(GL_TRIANGLES, 8, cubeVertex, 36, solidCubeIndex);
-    // cube.draw();
-  } else {
-    // Figure cube(GL_LINES, 8, cubeVertex, 24, wireCubeIndex);
-    // cube.draw();
+        {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
+         glm::vec2(0.0f, 0.0f)},
+        {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
+
+        {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
+         glm::vec2(0.0f, 0.0f)},
+        {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)},
+
+        {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)},
+        {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
+         glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
+         glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
+         glm::vec2(0.0f, 0.0f)},
+        {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
+         glm::vec2(0.0f, 1.0f)}};
+
+    Figure cube(GL_TRIANGLES, true, true, v);
+    cube.draw();
   }
-}
-
 };
 
 #endif
