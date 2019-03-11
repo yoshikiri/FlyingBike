@@ -10,10 +10,10 @@
 #include "Constants.h"
 #include "DrawFigure.h"
 #include "Model.h"
-#include "PerlinNoise.h"
 #include "Shader.h"
 #include "Window.h"
-#include "ppm.h"
+// #include "PerlinNoise.h"
+// #include "ppm.h"
 
 unsigned int loadTextureM(std::string filename, bool rgbaFlag = false);
 unsigned int loadCubeMap(std::vector<std::string> faces);
@@ -37,136 +37,104 @@ int main() {
 
   atexit(glfwTerminate);
 
-  // 背景色設定
+  // set background color
   // glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
   glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 
-  // 背面カリングを有効にする
+  // enable culling
   // glFrontFace(GL_CCW);
   // glCullFace(GL_BACK);
   // glEnable(GL_CULL_FACE);
 
-  // textureを上下逆に読み込む
+  // load texture flip flop vertically
   stbi_set_flip_vertically_on_load(true);
 
-  // デプスバッファを有効にする
+  // enable depth buffer
   glClearDepth(1.0);
   glDepthFunc(GL_LESS);
   glEnable(GL_DEPTH_TEST);
 
-  // shaderを作成する
-  Shader shader("../vertexshader.vert", "../fragmentshader.frag");
-
-  // modelの読み込み
+  //--------------------------------------------------------------------------//
+  // load model
   char nanosuit_path[] = "resource/nanosuit/nanosuit.obj";
   Model myModel(nanosuit_path);
 
-  std::vector<Vertex> verticesV;
+  // std::vector<Vertex> skyboxVertices;
+  // for (int i = 0; i < 3 * 36; i += 3) {
+  //   glm::vec3 pos(Constants::VERTICES_SKYBOX_FLOAT[i],
+  //                 Constants::VERTICES_SKYBOX_FLOAT[i + 1],
+  //                 Constants::VERTICES_SKYBOX_FLOAT[i + 2]);
+  //   glm::vec3 nor(0);
+  //   glm::vec2 tex(0);
+  //   Vertex v = {pos, nor, tex};
+  //   skyboxVertices.push_back(v);
+  // }
 
-  for (int i = 0; i < 8 * 36; i += 8) {
-    glm::vec3 pos(Constants::VERTICES_CUBE_FLOAT[i],
-                  Constants::VERTICES_CUBE_FLOAT[i + 1],
-                  Constants::VERTICES_CUBE_FLOAT[i + 2]);
-    glm::vec3 nor(Constants::VERTICES_CUBE_FLOAT[i + 3],
-                  Constants::VERTICES_CUBE_FLOAT[i + 4],
-                  Constants::VERTICES_CUBE_FLOAT[i + 5]);
-    glm::vec2 tex(Constants::VERTICES_CUBE_FLOAT[i + 6],
-                  Constants::VERTICES_CUBE_FLOAT[i + 7]);
-    Vertex v = {pos, nor, tex};
-    verticesV.push_back(v);
-  }
-
-  std::vector<Vertex> skyboxVertices;
-  for (int i = 0; i < 3 * 36; i += 3) {
-    glm::vec3 pos(Constants::VERTICES_SKYBOX_FLOAT[i],
-                  Constants::VERTICES_SKYBOX_FLOAT[i + 1],
-                  Constants::VERTICES_SKYBOX_FLOAT[i + 2]);
-    glm::vec3 nor(0);
-    glm::vec2 tex(0);
-    Vertex v = {pos, nor, tex};
-    skyboxVertices.push_back(v);
-  }
-
-  std::vector<Vertex> vPlane;
-  std::vector<GLuint> iPlane;
-
-  for (int i = 0; i < 32; i += 8) {
-    glm::vec3 pos(Constants::VERTICES_PLANE_FLOAT[i], Constants::VERTICES_PLANE_FLOAT[i + 1], Constants::VERTICES_PLANE_FLOAT[i + 2]);
-    glm::vec3 normal(Constants::VERTICES_PLANE_FLOAT[i + 3], Constants::VERTICES_PLANE_FLOAT[i + 4],
-                     Constants::VERTICES_PLANE_FLOAT[i + 5]);
-    glm::vec2 tex(Constants::VERTICES_PLANE_FLOAT[i + 6], Constants::VERTICES_PLANE_FLOAT[i + 7]);
-
-    vPlane.push_back({pos, normal, tex});
-  }
-
-  for (int i = 0; i < 6; i++) {
-    iPlane.push_back(Constants::INDICES_PLANE_UNIT[i]);
-  }
-
-  Figure plane(GL_TRIANGLES, true, true, vPlane, iPlane);
-
-  Figure fig(GL_TRIANGLES, true, true, verticesV);
-  Figure light(GL_TRIANGLES, false, false, verticesV);
-  Figure skybox(GL_TRIANGLES, false, false, skyboxVertices);
-
-  glm::vec3 cubePositions[] = {
-      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
-      glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
-      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
-      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
-      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
+  //--------------------------------------------------------------------------//
+  // load textures
 
   unsigned int diffuseMap = loadTextureM("resource/container2.png", true);
   // unsigned int specularMap = loadTextureM("resource/wall.jpg", false);
   unsigned int specularMap =
       loadTextureM("resource/container2_specular.png", true);
-  unsigned int triMap = loadTextureM("resource/wall.jpg", false);
 
-  std::vector<std::string> faces = {
-      "resource/skybox/right.jpg", "resource/skybox/left.jpg",
-      "resource/skybox/top.jpg",   "resource/skybox/bottom.jpg",
-      "resource/skybox/front.jpg", "resource/skybox/back.jpg"};
-  unsigned int cubeMap = loadCubeMap(faces);
+  // unsigned int triMap = loadTextureM("resource/wall.jpg", false);
+  //
+  // std::vector<std::string> faces = {
+  //     "resource/skybox/right.jpg", "resource/skybox/left.jpg",
+  //     "resource/skybox/top.jpg",   "resource/skybox/bottom.jpg",
+  //     "resource/skybox/front.jpg", "resource/skybox/back.jpg"};
+  // unsigned int cubeMap = loadCubeMap(faces);
 
-  glm::vec3 lampPos(1.2f, 1.0f, 1.0f);
-
-  Shader lightingShader("../lightingVertexShader.vert",
-                        "../lightingFragmentShader.frag");
-  lightingShader.use();
-
+  //--------------------------------------------------------------------------//
+  // create shaders
   Shader lampShader("../lampVertexShader.vert", "../lampFragmentShader.frag");
-  glm::mat4 lampModel(1.0f);
-  lampModel = glm::translate(glm::mat4(1.0), lampPos);
-  lampModel = glm::scale(lampModel, glm::vec3(0.2f));
+
+  // object shader
+  Shader lightingShader("../directionalLight.vert", "../directionalLight.frag");
+  // Shader lightingShader("../pointLight.vert", "../pointLight.frag");
+  // Shader lightingShader("../spotLight.vert", "../spotLight.frag");
 
   Shader skyboxShader("../skyboxVertexShader.vert",
                       "../skyboxFragmentShader.frag");
 
-  Camera camera(glm::vec3(0.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+  //--------------------------------------------------------------------------//
+  // create camera (perspective)
+  Camera camera(glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f), WIDTH, HEIGHT, true);
 
   //--------------------------------------------------------------------------//
-  // メインループ
+  // main loop
   double t = 0;
   while (window.shouldClose() == GL_FALSE) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    // 透視投影変換
-    glm::mat4 model(1.0);
-    // model = glm::scale(model, glm::vec3(0.2f));
-    glm::mat4 view = camera.getView();
-    glm::mat4 projection = camera.getProjection();
-
-    double radius = 1;
+    //------------------------------------------------------------------------//
+    // draw light
+    // double radius = 1;
     // glm::vec3 pos(radius * cos(glfwGetTime()), radius * sin(glfwGetTime()),
     //               -3.0);
-    glm::vec3 pos(1.0, 1.0, -3.0);
+    // glm::vec3 pos(1.0, 1.0, -3.0);
+    glm::vec3 lampPos(1.0f, 1.0f, 3.0f);
+    glm::mat4 lampModel(glm::translate(glm::mat4(1.0f), lampPos));
+    glm::mat4 lampView = camera.getView();
+    glm::mat4 lampProjection = camera.getProjection();
+    lampShader.use();
+    lampShader.setMat4("model", lampModel);
+    lampShader.setMat4("view", lampView);
+    lampShader.setMat4("projection", lampProjection);
+    t += 0.03;
 
-    // model = glm::translate(model, glm::vec3(-WIDTH/2.0f, -HEIGHT/2.0f, 0));
-    // model = glm::translate(model, glm::vec3(-1.0f, -1.0f, 0));
-    // model = glm::translate(model, glm::vec3(100, 100, 0));
-    // model = glm::rotate(model, -(float)M_PI/6, glm::vec3(1, 0, 0));
+    DrawFigure::drawCube(glm::vec3(1), glm::vec3(0.5), false, false);
+
+    //------------------------------------------------------------------------//
+    // set attribute for object shader
+    glm::mat4 model(1.0);
+    glm::mat4 view = camera.getView();
+    glm::mat4 projection = camera.getProjection();
 
     lightingShader.use();
     lightingShader.setMat4("model", model);
@@ -179,20 +147,24 @@ int main() {
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-    lightingShader.setVec3("light.position", pos);
-    lightingShader.setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+    // lightingShader.setVec3("light.position", lampPos);
+    lightingShader.setVec3("light.direction", glm::vec3(0.0f, 0.0f, 0.3f));
+    // lightingShader.setVec3("light.direction", glm::vec3(0.2f, 1.0f, 0.3f));
+    // lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+    // lightingShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
-    lightingShader.setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    lightingShader.setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    lightingShader.setVec3("light.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+    lightingShader.setVec3("light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
     lightingShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-    lightingShader.setFloat("light.constant", 1.0f);
-    lightingShader.setFloat("light.linear", 0.09f);
-    lightingShader.setFloat("light.quadratic", 0.032f);
-    // lightingShader.setVec3("light.diffuse", lightColor * glm::vec3(0.2));
+    // set attribute when the object shader uses point light
+    // lightingShader.setFloat("light.constant", 1.0f);
+    // lightingShader.setFloat("light.linear", 0.09f);
+    // lightingShader.setFloat("light.quadratic", 0.032f);
 
-    // 描画処理
+    //------------------------------------------------------------------------//
+    // draw objects
+
     // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, triMap);
     glActiveTexture(GL_TEXTURE0);
@@ -201,15 +173,16 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, specularMap);
 
     // fig.draw();
-    DrawFigure::drawCube(glm::vec3(0), glm::vec3(0));
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    DrawFigure::drawCube(glm::vec3(0, 0, 0.5), glm::vec3(1));
+    DrawFigure::drawCube(glm::vec3(0, 2, 0.5), glm::vec3(1));
+    DrawFigure::drawCube(glm::vec3(-1, 0, 0.5), glm::vec3(1));
     // plane.draw();
 
-    // for(int y=0;y<10;y++){
-    //   for(int x=0;x<10;x++){
-    //     DrawFigure::drawPlane(glm::vec3(-4+x,-4+y,0), glm::vec2(1,1));
-    //   }
-    // }
+    for (int y = 0; y < 10; y++) {
+      for (int x = 0; x < 10; x++) {
+        DrawFigure::drawPlane(glm::vec3(-4 + x, -4 + y, 0), glm::vec2(1, 1));
+      }
+    }
 
     // model = glm::translate(model, glm::vec3(0.5f, 0.5f, 0));
     // lightingShader.setMat4("model", model);
@@ -218,25 +191,8 @@ int main() {
 
     // myModel.draw(lightingShader);
 
-
-    lampModel = glm::translate(glm::mat4(1.0), pos);
-    lampModel = glm::scale(lampModel, glm::vec3(0.2));
-    // lampModel = glm::mat4(1.0f);
-    lampShader.use();
-    lampShader.setMat4("model", lampModel);
-    lampShader.setMat4("view", view);
-    lampShader.setMat4("projection", projection);
-    t += 0.03;
-    //
-    light.draw();
-
-    // for(int y=0;y<10;y++){
-    //   for(int x=0;x<10;x++){
-    //     lampModel = glm::translate(glm::mat4(1.0f), glm::vec3(x,y,-3.0));
-    //     lampShader.setMat4("model", lampModel);
-    //     light.draw();
-    //   }
-    // }
+    //------------------------------------------------------------------------//
+    // draw skybox
 
     // glDepthFunc(GL_LEQUAL);
     // skyboxShader.use();
