@@ -49,8 +49,12 @@ void main() {
 
   // attenaution
   float distance = length(light.position - FragmentPos);
+
+
   float attenaution = 1.0 / (light.constant + light.linear * distance +
                              light.quadratic * (distance * distance));
+  // float attenaution = 1.0 / (1.0 + 0.09f * distance +
+  //                         0.032f * (distance * distance));
 
   ambient *= attenaution;
   diffuse *= attenaution;
@@ -58,4 +62,5 @@ void main() {
 
   vec3 result = ambient + diffuse + specular;
   fragment = vec4(result, 1.0);
+  //fragment = vec4(vec3(attenaution), 1.0);
 }

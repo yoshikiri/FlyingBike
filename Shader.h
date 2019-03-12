@@ -29,12 +29,15 @@ public:
   }
 
   void setFloat(const std::string &name, float value) const {
-    glUniform1i(glGetUniformLocation(program, name.c_str()), value);
+    glUniform1f(glGetUniformLocation(program, name.c_str()), value);
   }
 
   void setVec3(const std::string &name, glm::vec3 value) const {
     glUniform3f(glGetUniformLocation(program, name.c_str()), value.x, value.y,
                 value.z);
+  }
+  void setVec3(const std::string &name, float x, float y, float z) const {
+    glUniform3f(glGetUniformLocation(program, name.c_str()), x, y, z);
   }
 
   void setMat4(const std::string &name, glm::mat4 value) const {
@@ -42,8 +45,8 @@ public:
                        glm::value_ptr(value));
   }
 
-private:
   const GLuint program;
+private:
 
   bool readShaderSource(const char *file_path, std::vector<GLchar> &buffer) {
     if (file_path == NULL)
