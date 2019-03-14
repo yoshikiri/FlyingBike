@@ -1,10 +1,10 @@
 #include "Model.h"
 
 #include <iostream>
-#include <vector>
 #include <stb_image.h>
+#include <vector>
 
-
+namespace {
 unsigned int loadTexture(std::string filename, bool rgbaFlag = false) {
   int WIDTH, HEIGHT, nrChannels;
   unsigned char *data =
@@ -33,6 +33,7 @@ unsigned int loadTexture(std::string filename, bool rgbaFlag = false) {
 
   return texture;
 }
+} // namespace
 
 void Model::draw(Shader shader) {
   for (unsigned int i = 0; i < meshes.size(); i++)

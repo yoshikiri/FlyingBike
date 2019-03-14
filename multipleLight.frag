@@ -41,7 +41,8 @@ struct SpotLight {
   vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 4
+#define NUM_POINT_LIGHTS 4
+#define NUM_SPOT_LIGHTS 4
 
 in vec3 FragmentPos;
 in vec3 Normal;
@@ -52,8 +53,31 @@ out vec4 fragment;
 uniform Material material;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform PointLight pointLights[NUM_POINT_LIGHTS];
+uniform SpotLight spotLights[NUM_SPOT_LIGHTS];
 uniform SpotLight spotLight;
+
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+
+void main() {
+  // properties
+  vec3 norm = normalize(Normal);
+  vec3 viewDir = normalize(viewPos - FragmentPos);
+
+  // phase 1: Directional lighting
+  vec3 result = calcDirLight(dirLight, norm, viewDir);
+  // phase 2: Point lights
+  for (int i = 0; i < NUM_POINT_LIGHTS; i++)
+    result += calcPointLight(pointLights[i], norm, FragmentPos, viewDir);
+
+  // phase 3: Spot light
+  for (int i = 0; i < NUM_POINT_LIGHTS; i++)
+    result += CalcSpotLight(spotLights[i], norm, FragmentPos, viewDir);
+
+  fragment = vec4(result, 1.0);
+}
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
   // ambient
@@ -118,25 +142,9 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
       light.diffuse * diff * vec3(texture(material.diffuse, TexCoord));
   vec3 specular =
       light.specular * spec * vec3(texture(material.specular, TexCoord));
+
   ambient *= attenuation * intensity;
   diffuse *= attenuation * intensity;
   specular *= attenuation * intensity;
   return (ambient + diffuse + specular);
-}
-
-void main() {
-  // properties
-  vec3 norm = normalize(Normal);
-  vec3 viewDir = normalize(viewPos - FragmentPos);
-
-  // phase 1: Directional lighting
-  vec3 result = calcDirLight(dirLight, norm, viewDir);
-  // phase 2: Point lights
-  for (int i = 0; i < NR_POINT_LIGHTS; i++)
-    result += calcPointLight(pointLights[i], norm, FragmentPos, viewDir);
-
-  // phase 3: Spot light
-  //result += CalcSpotLight(spotLight, norm, FragmentPos, viewDir);
-
-  fragment = vec4(result, 1.0);
 }
