@@ -12,7 +12,13 @@
 #include "Result.h"
 #include "Shader.h"
 
+void mouse_button_callback(GLFWwindow *window, int button, int action,
+                           int mods);
+
 namespace {
+int target = 0;
+std::vector<Goal> targets;
+
 const glm::vec3 containerPositions[] = {
     glm::vec3(0.0f, 0.0f, 0.5f),
     glm::vec3(2.5f, 1.5f, 0.5f),
@@ -35,10 +41,12 @@ const float WIDTH = 800.0f;
 const float HEIGHT = 600.0f;
 
 const int NUM_SPOT_LIGHTS = 4;
+const int MAX_TARGETS = 9;
 
 } // namespace
 
-Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int textures[])
+Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int textures[],
+           unsigned int numbers[])
     : State(window),
       player(std::make_unique<Player>(center, textures[0], textures[1])),
       containers(std::make_unique<
@@ -51,63 +59,77 @@ Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int textures[])
           "resource/shader/directionalAndSpotLightObject.frag")),
       skyboxShader(std::make_unique<Shader>("resource/shader/skybox.vert",
                                             "resource/shader/skybox.frag")),
-      camera(std::make_unique<Camera>(cameraPositionPlay, cameraEye,
+      camera(std::make_unique<Camera>(cameraPositionLookDown, cameraEye,
                                       cameraUp, WIDTH, HEIGHT, true)),
-      textures(new unsigned int[6]) {
+      textures(new unsigned int[6]), numbers(new unsigned int[9]) {
 
   //--------------------------------------------------------------------------//
   for (int i = 0; i < 6; i++)
     this->textures[i] = textures[i];
+  for (int i = 0; i < 9; i++)
+    this->numbers[i] = numbers[i];
 
   for (glm::vec3 p : containerPositions)
     containers->emplace_back(p, glm::vec3(1.0f), textures[2], textures[3]);
   for (glm::vec3 p : goalPositions)
-    goals->emplace_back(p, 0.45f);
+    goals->emplace_back(p, 0.4f);
 
   initShaders();
+
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+
+  // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+  //   player->velocity.x += 0.001;
+  // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+  //   player->velocity.x -= 0.001;
+  // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+  //   player->velocity.y += 0.001;
+  // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+  //   player->velocity.y -= 0.001;
 }
 
 State *Play::update() {
   State *next = this;
 
-  updateShaders();
-
   if (checkClear())
     next = new Result(window);
 
+  updateShaders();
   draw();
-  // next = new Result(window);
   return next;
 }
 
 void Play::draw() {
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
   // draw containers
-  for (Container c : *containers) {
+  for (Container c : *containers)
     c.draw();
-  }
 
   // draw planes
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textures[4]);
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, 0);
-  for (int y = 0; y < 10; y++) {
-    for (int x = 0; x < 10; x++) {
-      DrawFigure::drawPlane(glm::vec3(-4 + x, -4 + y, 0), glm::vec2(1, 1));
+  for (int y = 0; y < 20; y++) {
+    for (int x = 0; x < 20; x++) {
+      DrawFigure::drawPlane(glm::vec3(-10 + x, -10 + y, 0), glm::vec2(1, 1));
     }
   }
 
-  // draw player
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    player->velocity.x += 0.001;
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    player->velocity.x -= 0.001;
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    player->velocity.y += 0.001;
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    player->velocity.y -= 0.001;
+  // draw targets
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE0);
 
-  // player->seek(target);
+  for (int i = 0; i < targets.size(); i++) {
+    glBindTexture(GL_TEXTURE_2D, numbers[i]);
+    DrawFigure::drawCircle(targets[i].center, 0.6, 20);
+  }
+
+  // draw player
+  if (targets.size() != 0)
+    player->seek(targets[target].center);
 
   // check if player's collision
   for (Container c : *containers)
@@ -115,6 +137,17 @@ void Play::draw() {
 
   for (Goal &g : *goals)
     player->checkGoal(g);
+
+  for (Goal &t : targets) {
+    player->checkGoal(t);
+  }
+
+  // change target
+  if (targets.size() != 0 && targets[target].isClear == true) {
+    target++;
+    target = (target >= targets.size()) ? (targets.size() - 1) : target;
+    // if(target >= targets.size()) target = targets.size() -1;
+  }
 
   player->update();
   player->draw();
@@ -185,5 +218,19 @@ void Play::updateShaders() {
     char buff[30];
     snprintf(buff, sizeof(buff), "spotLights[%d].ambient", i);
     objectShader->setVec3(std::string(buff), (*goals)[i].color);
+  }
+}
+
+void mouse_button_callback(GLFWwindow *window, int button, int action,
+                           int mods) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if (targets.size() >= MAX_TARGETS)
+      return;
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+
+    float tx = -(x - 400) / 50.0f;
+    float ty = (y - 300) / 50.0f;
+    targets.emplace_back(glm::vec3(tx, ty, 0.5f), 0.1);
   }
 }

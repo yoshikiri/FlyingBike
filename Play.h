@@ -23,7 +23,7 @@ template <class T, class Allocator> class vector;
 
 class Play : public State {
 public:
-  Play(GLFWwindow *window, glm::vec3 center, unsigned int textures[]);
+  Play(GLFWwindow *window, glm::vec3 center, unsigned int textures[], unsigned int numbers[]);
 
   State *update() override;
 
@@ -36,6 +36,7 @@ private:
   std::unique_ptr<Shader> skyboxShader;
   std::unique_ptr<Camera> camera;
   unsigned int *textures;
+  unsigned int *numbers;
 
   void draw();
 
