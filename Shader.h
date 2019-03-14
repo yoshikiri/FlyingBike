@@ -2,11 +2,12 @@
 #define SHADER_H
 
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
+// #include <GLFW/glfw3.h>
+
 #include <cstdlib>
 #include <fstream>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+// #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <sstream>

@@ -11,7 +11,7 @@ public:
 
   void checkClear();
 
-private:
+// private:
   glm::vec3 color;
   bool isClear;
 };
