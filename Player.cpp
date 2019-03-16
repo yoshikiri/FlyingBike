@@ -54,10 +54,10 @@ void Player::checkCollision(const AABB &obj) {
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // speed down
-  // if (glm::length(velocity) > maxSpeed) {
-  velocity = glm::normalize(velocity);
-  velocity *= (maxSpeed / 5.0f);
-  // }
+  if (glm::length(velocity) > maxSpeed / 3.0f) {
+    velocity = glm::normalize(velocity);
+    velocity *= (maxSpeed / 3.0f);
+  }
 }
 
 void Player::checkGoal(Goal &obj) {

@@ -23,7 +23,7 @@ template <class T, class Allocator> class vector;
 
 class Play : public State {
 public:
-  Play(GLFWwindow *window, glm::vec3 center, unsigned int textures[], unsigned int numbers[]);
+  Play(GLFWwindow *window, glm::vec3 center, unsigned int stage);
 
   State *update() override;
 
@@ -34,17 +34,25 @@ private:
   std::unique_ptr<Shader> lightShader;
   std::unique_ptr<Shader> objectShader;
   std::unique_ptr<Shader> skyboxShader;
+  std::unique_ptr<Shader> textShader;
   std::unique_ptr<Camera> camera;
-  unsigned int *textures;
-  unsigned int *numbers;
+  std::unique_ptr<unsigned int[]> objectTextures;
+  std::unique_ptr<unsigned int[]> numberTextures;
+  const unsigned int stage;
+  bool isSettingTarget;
 
   void draw();
 
-  bool checkClear();
+  void updatePlayer();
+
+  State *checkGameEnd();
 
   void initShaders();
 
   void updateShaders();
+
+  void RenderText(Shader &s, std::string text, GLfloat x, GLfloat y,
+                  GLfloat scale, glm::vec3 color);
 };
 
 #endif

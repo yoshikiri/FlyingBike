@@ -7,6 +7,7 @@
 #include "Window.h"
 #include "textureManager.h"
 #include "Play.h"
+#include "Result.h"
 
 int main() {
   //--------------------------------------------------------------------------//
@@ -99,7 +100,8 @@ int main() {
   unsigned int tex[] = {diffuseMapPlayer, specularMap,     diffuseMapContainer,
                         specularMap,      diffuseMapFloor, diffuseMapTarget};
 
-  State *state = new Play(window.getWindow(), glm::vec3(3, -0.5, 0.5), tex, numbers);
+  // State *state = new Play(window.getWindow(), glm::vec3(3, -0.5, 0.5), 0);
+  State *state = new Result(window.getWindow(), 123.456f, true, 1);
   //--------------------------------------------------------------------------//
   // main loop
   while (window.shouldClose() == GL_FALSE) {
@@ -110,6 +112,7 @@ int main() {
 
 
     State *next = state->update();
+    if(next != state) state = next;
 
 
     //------------------------------------------------------------------------//

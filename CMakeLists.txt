@@ -13,6 +13,6 @@ find_package(GLEW REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 link_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 
-add_executable(FlyingBike main.cpp Mesh.cpp Model.cpp Camera.cpp Player.cpp Container.cpp Goal.cpp Play.cpp Result.cpp)
+add_executable(FlyingBike main.cpp Mesh.cpp Model.cpp Camera.cpp Player.cpp Container.cpp Goal.cpp Title.cpp Play.cpp Result.cpp)
 
-target_link_libraries(FlyingBike ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} assimp glfw3 openal Xrandr Xinerama Xcursor Xi Xxf86vm X11 rt m dl)
+target_link_libraries(FlyingBike ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} freetype assimp glfw3 openal Xrandr Xinerama Xcursor Xi Xxf86vm X11 rt m dl)
