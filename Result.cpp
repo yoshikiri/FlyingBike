@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <irrKlang/irrKlang.h>
 #include <map>
 #include <stb_image.h>
 #include <string>
@@ -59,7 +60,12 @@ unsigned int loadTexture(std::string filename, bool useAlpha = true) {
 
 std::map<GLchar, Character> characters;
 
-std::string highScoreFile = "resource/HighScore.txt";
+auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
+    irrklang::createIrrKlangDevice());
+
+std::string highScoreFile[] = {
+    "resource/HighScore0.txt", "resource/HighScore1.txt",
+    "resource/HighScore2.txt", "resource/HighScore3.txt"};
 
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
 // const glm::vec3 cameraPositionPlay(0.0f, 5.0f, 5.0f);
@@ -86,6 +92,13 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
       highScores(std::make_unique<float[]>(5)), isClear(isClear), stage(stage),
       updateHighScore(false) {
 
+  if (isClear)
+    (*soundEngine)
+        ->play2D("resource/Music/se_maoudamashii_jingle05.ogg", false);
+  else
+    (*soundEngine)
+        ->play2D("resource/Music/se_maoudamashii_jingle02.ogg", false);
+
   for (int i = 0; i < 10; i++) {
     char buff[5];
     snprintf(buff, sizeof(buff), "%d", i);
@@ -101,7 +114,7 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
 
   initShaders();
 
-  loadHighScore(highScoreFile);
+  loadHighScore(highScoreFile[stage]);
   std::vector<float> v;
   if (isClear)
     v.push_back(score);
@@ -119,11 +132,11 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
     v.erase(v.begin() + 5);
     for (int i = 0; i < 5; i++) {
       highScores[i] = v[i];
-      std::cout << highScores[i] << '\n';
+      // std::cout << highScores[i] << '\n';
     }
   }
 
-  writeHighScore(highScoreFile);
+  writeHighScore(highScoreFile[stage]);
 
   // FT_Library ft;
   // if (FT_Init_FreeType(&ft))
@@ -180,6 +193,7 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
 
 State *Result::update() {
   State *next = this;
+  // std::unique_ptr<State> a(this);
 
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
     next = new Title(window);
@@ -187,7 +201,7 @@ State *Result::update() {
   if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
     std::cout << isClear << '\n';
     std::cout << score << '\n';
-    next = new Play(window, glm::vec3(3, -0.5, 0.5), stage);
+    next = new Play(window, stage);
   }
 
   draw();
@@ -200,11 +214,10 @@ void Result::draw() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   glActiveTexture(GL_TEXTURE0);
-  if (isClear){
+  if (isClear) {
     glBindTexture(GL_TEXTURE_2D, resultTextures[0]);
     DrawFigure::drawPlane(glm::vec3(3, -3.5, 0), glm::vec2(12, 4));
-  }
-  else{
+  } else {
     glBindTexture(GL_TEXTURE_2D, resultTextures[1]);
     DrawFigure::drawPlane(glm::vec3(2, -3.5, 0), glm::vec2(12, 4));
   }

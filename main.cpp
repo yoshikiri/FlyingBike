@@ -2,12 +2,14 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <irrKlang/irrKlang.h>
 
 // #include "Shader.h"
-#include "Window.h"
-#include "textureManager.h"
 #include "Play.h"
 #include "Result.h"
+#include "Title.h"
+#include "Window.h"
+#include "textureManager.h"
 
 int main() {
   //--------------------------------------------------------------------------//
@@ -75,32 +77,45 @@ int main() {
 
   //--------------------------------------------------------------------------//
   // load textures
-  unsigned int diffuseMapContainer =
-      loadTexture("resource/container2.png", true);
-  // unsigned int diffuseMapWall = loadTextureM("resource/brick-wall.png",
+  // // unsigned int diffuseMapContainer =
+  // //     loadTexture("resource/container2.png", true);
+  // // // unsigned int diffuseMapWall = loadTextureM("resource/brick-wall.png",
+  // // // true);
+  // // unsigned int diffuseMapFloor = loadTexture("resource/wood-texture.png",
   // true);
-  unsigned int diffuseMapFloor = loadTexture("resource/wood-texture.png", true);
-  unsigned int diffuseMapPlayer = loadTexture("resource/poly.png", true);
-  unsigned int diffuseMapTarget = loadTexture("resource/one.png", true);
-  // unsigned int diffuseMapFloor = loadTextureM("resource/wood_grain.png",
-  // true); unsigned int specularMap = loadTextureM("resource/wall.jpg", false);
-  unsigned int specularMap =
-      loadTexture("resource/container2_specular.png", true);
-
-  unsigned int *numbers = new unsigned int[9];
-  for(int i=0;i<9;i++){
-    char buff[5];
-    snprintf(buff, sizeof(buff), "%d", i+1);
-    numbers[i] = loadTexture(std::string("resource/number/") + std::string(buff) + ".png", true);
-  }
+  // // unsigned int diffuseMapPlayer = loadTexture("resource/poly.png", true);
+  // // unsigned int diffuseMapTarget = loadTexture("resource/one.png", true);
+  // // // unsigned int diffuseMapFloor =
+  // loadTextureM("resource/wood_grain.png",
+  // // // true); unsigned int specularMap = loadTextureM("resource/wall.jpg",
+  // false);
+  // // unsigned int specularMap =
+  // //     loadTexture("resource/container2_specular.png", true);
+  // //
+  // // unsigned int *numbers = new unsigned int[9];
+  // // for (int i = 0; i < 9; i++) {
+  // //   char buff[5];
+  // //   snprintf(buff, sizeof(buff), "%d", i + 1);
+  // //   numbers[i] = loadTexture(
+  // //       std::string("resource/number/") + std::string(buff) + ".png",
+  // true);
+  // }
   // lightingShader.setInt("material.diffuse", 0);
   // lightingShader.setInt("material.specular", 1);
 
   //--------------------------------------------------------------------------//
-  unsigned int tex[] = {diffuseMapPlayer, specularMap,     diffuseMapContainer,
-                        specularMap,      diffuseMapFloor, diffuseMapTarget};
+  // unsigned int tex[] = {diffuseMapPlayer, specularMap, diffuseMapContainer,
+  //                       specularMap,      diffuseMapFloor, diffuseMapTarget};
 
-  State *state = new Play(window.getWindow(), glm::vec3(3, -0.5, 0.5), 0);
+  // std::unique_ptr<State> state(new Play(window.getWindow(), glm::vec3(3,
+  // -0.5, 0.5), 0));
+  // State *state = new Play(window.getWindow(), 1);
+  State *state = new Title(window.getWindow());
+
+  auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
+      irrklang::createIrrKlangDevice());
+
+  (*soundEngine)->play2D("resource/Music/Galaxy.ogg", GL_TRUE);
   // State *state = new Result(window.getWindow(), 10.323f, true, 1);
   // State *state = new Result(window.getWindow(), 110.323f, false, 1);
   //--------------------------------------------------------------------------//
@@ -108,16 +123,17 @@ int main() {
   while (window.shouldClose() == GL_FALSE) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-
     State *next = state->update();
-    if(next != state) state = next;
+    // std::unique_ptr<State> next = std::make_unique<State>((state->update()));
+    if (next != state)
+      state = next;
+    // state = std::move(next);
 
+    // state = std::make_unique<State>(next);
 
     //------------------------------------------------------------------------//
-
 
     // model = glm::translate(model, glm::vec3(0.5f, 0.5f, 0));
     // lightingShader.setMat4("model", model);
@@ -152,6 +168,8 @@ int main() {
     // ダブルバッファリング
     window.swapBuffers();
   }
+
+  delete state;
 
   return 0;
 }

@@ -60,13 +60,12 @@ void Player::checkCollision(const AABB &obj) {
   }
 }
 
-void Player::checkGoal(Goal &obj) {
+bool Player::checkGoal(Goal &obj) {
   if (this->isIntersected(obj)) {
-    // return true;
-    // obj.color = glm::vec3(0.0f, 1.0f, 0.0f);
     obj.checkClear();
+    return true;
   }
-  // return false;
+  return false;
 }
 
 void Player::applyForce(glm::vec3 force) { acceleration += force / 1.0f; }

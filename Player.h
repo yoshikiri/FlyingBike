@@ -19,7 +19,7 @@ public:
 
   void checkCollision(const AABB &obj);
 
-  void checkGoal(Goal &obj);
+  bool checkGoal(Goal &obj);
 
   void applyForce(const glm::vec3 force);
 

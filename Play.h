@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+
 class Player;
 class Container;
 class Goal;
@@ -23,9 +24,13 @@ template <class T, class Allocator> class vector;
 
 class Play : public State {
 public:
-  Play(GLFWwindow *window, glm::vec3 center, unsigned int stage);
+  Play(GLFWwindow *window, unsigned int stage);
+
+  ~Play();
 
   State *update() override;
+  // std::unique_ptr<State> update() override;
+
 
 private:
   std::unique_ptr<Player> player;
@@ -41,6 +46,7 @@ private:
   const unsigned int stage;
   bool isSettingTarget;
   const float startTime;
+  // std::unique_ptr<irrklang::ISoundEngine *> soundEngine;
 
   void draw();
 

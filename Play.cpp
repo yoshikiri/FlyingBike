@@ -2,10 +2,15 @@
 
 // #include <glm/glm.hpp>
 #include <cstdio>
+#include <irrKlang/irrKlang.h>
 #include <map>
 #include <stb_image.h>
 #include <unistd.h>
 #include <vector>
+
+// #include <future>
+// #include <thread>
+// #include <ctime>
 
 #include "Camera.h"
 #include "Container.h"
@@ -28,25 +33,66 @@ struct Character {
 namespace {
 std::map<GLchar, Character> characters;
 
+auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
+    irrklang::createIrrKlangDevice());
+
 int target = 0;
 std::vector<Goal> targets;
 
-const glm::vec3 containerPositions[] = {
-    glm::vec3(0.0f, 0.0f, 0.5f),
-    glm::vec3(2.5f, 1.5f, 0.5f),
-    glm::vec3(-1.0f, 1.0f, 0.5f),
-    glm::vec3(-2.0f, -2.0f, 0.5f),
+const glm::vec3 playerStartPosition[] = {
+  glm::vec3(3, -0.5, 0.5),
+  glm::vec3(3, 0.5, 0.5),
+  glm::vec3(-2, -3.5, 0.5),
+  glm::vec3(-2, 3.5, 0.5),
 };
 
-const glm::vec3 goalPositions[] = {
-    glm::vec3(-1.0f, 0.0f, 0.5f),
+const glm::vec3 containerPositions[][4] = {
+
+    {glm::vec3(0.0f, 0.0f, 0.5f),
+    glm::vec3(2.5f, 1.5f, 0.5f),
+    glm::vec3(-1.0f, 1.0f, 0.5f),
+    glm::vec3(-2.0f, -2.0f, 0.5f)},
+
+    {glm::vec3(1.0f, 0.0f, 0.5f),
+    glm::vec3(3.5f, 1.5f, 0.5f),
+    glm::vec3(-2.0f, 2.0f, 0.5f),
+    glm::vec3(-3.0f, -2.0f, 0.5f)},
+
+    {glm::vec3(1.0f, 0.0f, 0.5f),
+    glm::vec3(2.0f, 1.0f, 0.5f),
+    glm::vec3(3.0f, 2.0f, 0.5f),
+    glm::vec3(4.0f, 3.0f, 0.5f)},
+
+    {glm::vec3(-1.0f, 0.0f, 0.5f),
+    glm::vec3(-3.5f, 1.5f, 0.5f),
+    glm::vec3(4.0f, 2.0f, 0.5f),
+    glm::vec3(5.0f, -2.0f, 0.5f)},
+};
+
+const glm::vec3 goalPositions[][4] = {
+    {glm::vec3(-1.0f, 0.0f, 0.5f),
     glm::vec3(2.0f, 1.5f, 0.5f),
     glm::vec3(-3.0f, 1.0f, 0.5f),
-    glm::vec3(-2.0f, -3.0f, 0.5f),
+    glm::vec3(-2.0f, -3.0f, 0.5f)},
+
+    {glm::vec3(-3.0f, 0.0f, 0.5f),
+    glm::vec3(2.0f, 1.5f, 0.5f),
+    glm::vec3(-3.0f, 1.0f, 0.5f),
+    glm::vec3(2.0f, -3.0f, 0.5f)},
+
+    {glm::vec3(2.0f, 0.0f, 0.5f),
+    glm::vec3(2.0f, 1.0f, 0.5f),
+    glm::vec3(3.0f, 2.0f, 0.5f),
+    glm::vec3(3.0f, 3.0f, 0.5f)},
+
+    {glm::vec3(-3.0f, 0.0f, 0.5f),
+    glm::vec3(-4.0f, 1.5f, 0.5f),
+    glm::vec3(-3.0f, 1.0f, 0.5f),
+    glm::vec3(-3.0f, -3.0f, 0.5f)},
 };
 
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
-const glm::vec3 cameraPositionPlay(0.0f, 5.0f, 5.0f);
+// const glm::vec3 cameraPositionPlay(0.0f, 5.0f, 5.0f);
 const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
 const glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 const float WIDTH = 800.0f;
@@ -63,10 +109,19 @@ const std::string fileObjectTextures[][6] = {
     {"resource/poly.png", "resource/container2_specular.png",
      "resource/container2.png", "resource/container2_specular.png",
      "resource/wood-texture.png", "resource/one.png"},
+
+    {"resource/poly.png", "resource/container2_specular.png",
+     "resource/container2.png", "resource/container2_specular.png",
+     "resource/wood-texture.png", "resource/one.png"},
+
+    {"resource/poly.png", "resource/container2_specular.png",
+     "resource/container2.png", "resource/container2_specular.png",
+     "resource/wood-texture.png", "resource/one.png"},
 };
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods) {
+  // add target at the mouse cursor position
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     if (targets.size() >= MAX_TARGETS)
       return;
@@ -75,7 +130,15 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
 
     float tx = -(x - 400) / 50.0f;
     float ty = (y - 300) / 50.0f;
-    targets.emplace_back(glm::vec3(tx, ty, 0.5f), 0.1);
+    targets.emplace_back(glm::vec3(tx, ty, 0.5f), 0.01);
+    (*soundEngine)
+        ->play2D("resource/Music/se_maoudamashii_system44.ogg", false);
+  }
+  // delete last added target
+  else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+    if (targets.size() > 0) {
+      targets.erase(targets.end() - 1);
+    }
   }
 }
 
@@ -112,7 +175,7 @@ unsigned int loadTexture(std::string filename, bool useAlpha = true) {
 
 } // namespace
 
-Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int stage)
+Play::Play(GLFWwindow *window, unsigned int stage)
     : State(window),
 
       containers(std::make_unique<
@@ -146,12 +209,12 @@ Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int stage)
   }
 
   player =
-      std::make_unique<Player>(center, objectTextures[0], objectTextures[1]);
+      std::make_unique<Player>(playerStartPosition[stage], objectTextures[0], objectTextures[1]);
 
-  for (glm::vec3 p : containerPositions)
+  for (glm::vec3 p : containerPositions[stage])
     containers->emplace_back(p, glm::vec3(1.0f), objectTextures[2],
                              objectTextures[3]);
-  for (glm::vec3 p : goalPositions)
+  for (glm::vec3 p : goalPositions[stage])
     goals->emplace_back(p, 0.4f);
 
   target = 0;
@@ -175,15 +238,27 @@ Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int stage)
   textShader->setMat4("projection", camera->getProjection());
 }
 
+Play::~Play() {
+  (*soundEngine)->stopAllSounds();
+  (*soundEngine)->drop();
+}
+
 State *Play::update() {
   State *next = this;
+  // std::unique_ptr<State> ne = std::make_unique<State>(this);
+
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    next = new Result(window, (glfwGetTime() - startTime), false, stage);
 
   if (isSettingTarget) {
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
       isSettingTarget = false;
       glfwSetMouseButtonCallback(window, 0);
+      (*soundEngine)
+          ->play2D("resource/Music/se_maoudamashii_system13.ogg", false);
     }
   } else {
+
     updatePlayer();
     next = checkGameEnd();
   }
@@ -195,6 +270,7 @@ State *Play::update() {
 }
 
 void Play::draw() {
+  glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   // draw containers
@@ -237,12 +313,22 @@ void Play::updatePlayer() {
   if (targets.size() != 0)
     player->seek(targets[target].center);
 
-  // check if player's collision
+  // check  player's collision
   for (Container c : *containers)
     player->checkCollision(c);
 
-  for (Goal &g : *goals)
-    player->checkGoal(g);
+  for (Goal &g : *goals) {
+    bool prevIsClear = g.isClear;
+
+    if (player->checkGoal(g)) {
+      // play sound once when reach goal
+      if (g.isClear == prevIsClear)
+        continue;
+
+      (*soundEngine)
+          ->play2D("resource/Music/se_maoudamashii_system46.ogg", false);
+    }
+  }
 
   // change target
   player->checkGoal(targets[target]);
@@ -264,14 +350,13 @@ State *Play::checkGameEnd() {
   }
 
   if (isEnd) {
-    sleep(2);
     bool gameClear = true;
-
     for (Goal g : *goals) {
       if (!g.isClear)
         gameClear = false;
     }
     next = new Result(window, (glfwGetTime() - startTime), gameClear, stage);
+    sleep(2);
   }
 
   return next;
@@ -302,7 +387,7 @@ void Play::initShaders() {
     char buff[30];
     snprintf(buff, sizeof(buff), "spotLights[%d].position", i);
     objectShader->setVec3(std::string(buff),
-                          goalPositions[i] + glm::vec3(0.0f, 0.0f, 1.5f));
+                          goalPositions[stage][i] + glm::vec3(0.0f, 0.0f, 1.5f));
     snprintf(buff, sizeof(buff), "spotLights[%d].direction", i);
     objectShader->setVec3(std::string(buff), glm::vec3(0.0f, 0.0f, -1.0f));
     snprintf(buff, sizeof(buff), "spotLights[%d].ambient", i);
@@ -385,10 +470,6 @@ void Play::RenderText(Shader &s, std::string text, GLfloat x, GLfloat y,
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // // position
-    // glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4,
-    //                       (void *)(0));
-    // glEnableVertexAttribArray(0);
     // Render quad
     glDrawArrays(GL_TRIANGLES, 0, 6);
     // Now advance cursors for next glyph (note that advance is number of 1/64
