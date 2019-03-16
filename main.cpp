@@ -100,8 +100,9 @@ int main() {
   unsigned int tex[] = {diffuseMapPlayer, specularMap,     diffuseMapContainer,
                         specularMap,      diffuseMapFloor, diffuseMapTarget};
 
-  // State *state = new Play(window.getWindow(), glm::vec3(3, -0.5, 0.5), 0);
-  State *state = new Result(window.getWindow(), 123.456f, true, 1);
+  State *state = new Play(window.getWindow(), glm::vec3(3, -0.5, 0.5), 0);
+  // State *state = new Result(window.getWindow(), 10.323f, true, 1);
+  // State *state = new Result(window.getWindow(), 110.323f, false, 1);
   //--------------------------------------------------------------------------//
   // main loop
   while (window.shouldClose() == GL_FALSE) {

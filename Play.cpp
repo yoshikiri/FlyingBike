@@ -2,9 +2,9 @@
 
 // #include <glm/glm.hpp>
 #include <cstdio>
+#include <map>
 #include <stb_image.h>
 #include <unistd.h>
-#include <map>
 #include <vector>
 
 #include "Camera.h"
@@ -25,10 +25,8 @@ struct Character {
   GLuint advance;
 };
 
-
 namespace {
 std::map<GLchar, Character> characters;
-
 
 int target = 0;
 std::vector<Goal> targets;
@@ -133,7 +131,7 @@ Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int stage)
                                       cameraUp, WIDTH, HEIGHT, true)),
       objectTextures(std::make_unique<unsigned int[]>(6)),
       numberTextures(std::make_unique<unsigned int[]>(10)), stage(stage),
-      isSettingTarget(true) {
+      isSettingTarget(true), startTime(glfwGetTime()) {
   //--------------------------------------------------------------------------//
 
   for (int i = 0; i < 6; i++) {
@@ -172,7 +170,8 @@ Play::Play(GLFWwindow *window, glm::vec3 center, unsigned int stage)
   // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
   //   player->velocity.y -= 0.001;
 
-  // textShader->setMat4("projection", glm::ortho(-40.0f, 40.0f, -30.0f, 30.0f));
+  // textShader->setMat4("projection", glm::ortho(-40.0f, 40.0f,
+  // -30.0f, 30.0f));
   textShader->setMat4("projection", camera->getProjection());
 }
 
@@ -272,7 +271,7 @@ State *Play::checkGameEnd() {
       if (!g.isClear)
         gameClear = false;
     }
-    next = new Result(window, glfwGetTime(), gameClear, stage);
+    next = new Result(window, (glfwGetTime() - startTime), gameClear, stage);
   }
 
   return next;

@@ -1,6 +1,9 @@
 #include "Result.h"
 
+#include "fstream"
+#include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 #include <map>
 #include <stb_image.h>
 #include <string>
@@ -56,6 +59,8 @@ unsigned int loadTexture(std::string filename, bool useAlpha = true) {
 
 std::map<GLchar, Character> characters;
 
+std::string highScoreFile = "resource/HighScore.txt";
+
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
 // const glm::vec3 cameraPositionPlay(0.0f, 5.0f, 5.0f);
 const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
@@ -76,8 +81,10 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
                                           "resource/shader/text.frag")),
       camera(std::make_unique<Camera>(cameraPositionLookDown, cameraEye,
                                       cameraUp, WIDTH, HEIGHT, true)),
-      numberTextures(std::make_unique<unsigned int[]>(11)), score(score),
-      isClear(isClear), stage(stage) {
+      numberTextures(std::make_unique<unsigned int[]>(11)),
+      resultTextures(std::make_unique<unsigned int[]>(4)), score(score),
+      highScores(std::make_unique<float[]>(5)), isClear(isClear), stage(stage),
+      updateHighScore(false) {
 
   for (int i = 0; i < 10; i++) {
     char buff[5];
@@ -87,7 +94,37 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
   }
   numberTextures[10] = loadTexture("resource/number_result/period.png");
 
+  resultTextures[0] = loadTexture("resource/clear.png");
+  resultTextures[1] = loadTexture("resource/failure.png");
+  resultTextures[2] = loadTexture("resource/new.png");
+  resultTextures[3] = loadTexture("resource/guide_result.png");
+
   initShaders();
+
+  loadHighScore(highScoreFile);
+  std::vector<float> v;
+  if (isClear)
+    v.push_back(score);
+  for (int i = 0; i < 5; i++) {
+    v.push_back(highScores[i]);
+  }
+
+  std::sort(v.begin(), v.end());
+
+  // new record
+  if (isClear) {
+    if (v[4] != score)
+      updateHighScore = true;
+
+    v.erase(v.begin() + 5);
+    for (int i = 0; i < 5; i++) {
+      highScores[i] = v[i];
+      std::cout << highScores[i] << '\n';
+    }
+  }
+
+  writeHighScore(highScoreFile);
+
   // FT_Library ft;
   // if (FT_Init_FreeType(&ft))
   //   std::cout << "ERROR::FREETYPE: Could not init FreeType Library"
@@ -162,7 +199,31 @@ State *Result::update() {
 void Result::draw() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  drawScore(glm::vec2(1,2));
+  glActiveTexture(GL_TEXTURE0);
+  if (isClear){
+    glBindTexture(GL_TEXTURE_2D, resultTextures[0]);
+    DrawFigure::drawPlane(glm::vec3(3, -3.5, 0), glm::vec2(12, 4));
+  }
+  else{
+    glBindTexture(GL_TEXTURE_2D, resultTextures[1]);
+    DrawFigure::drawPlane(glm::vec3(2, -3.5, 0), glm::vec2(12, 4));
+  }
+
+  drawScore(glm::vec2(6, -1), score);
+
+  for (int i = 0; i < 5; i++) {
+    drawScore(glm::vec2(-2, -1 + i), highScores[i]);
+    if (updateHighScore && highScores[i] == score) {
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, resultTextures[2]);
+      DrawFigure::drawPlane(glm::vec3(0, -1 + i, 0),
+                            glm::vec2(3, 3.39f / 3.0f));
+    }
+  }
+
+  // draw guide
+  glBindTexture(GL_TEXTURE_2D, resultTextures[3]);
+  DrawFigure::drawPlane(glm::vec3(1, 4.5, 0), glm::vec2(12, 1));
 }
 
 void Result::initShaders() {
@@ -193,7 +254,7 @@ void Result::updateShaders() {
   objectShader->setMat4("projection", camera->getProjection());
 }
 
-void Result::drawScore(glm::vec2 pos) {
+void Result::drawScore(glm::vec2 pos, float score) {
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -210,11 +271,10 @@ void Result::drawScore(glm::vec2 pos) {
   float scoreX = 0;
   for (int i = 0; i < scoreString.length(); i++) {
     if (i == periodIndex) {
-      scoreX -= 0.2;
+      scoreX -= 0.3;
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, numberTextures[10]);
-      DrawFigure::drawPlane(glm::vec3(scoreX - 0.05, 0.2, -0.1),
-                            glm::vec2(0.2, 0.2));
+      DrawFigure::drawPlane(glm::vec3(scoreX, 0.22, -0.1), glm::vec2(0.1, 0.1));
       scoreX += 0.4;
     } else {
       glActiveTexture(GL_TEXTURE0);
@@ -226,6 +286,30 @@ void Result::drawScore(glm::vec2 pos) {
   }
 
   objectShader->setMat4("model", glm::mat4(1.0f));
+}
+
+void Result::loadHighScore(std::string filepath) {
+  std::ifstream ifs(filepath);
+  std::string str;
+
+  if (ifs.fail()) {
+    std::cerr << "failed to open " << filepath << '\n';
+    return;
+  }
+  int i = 0;
+  while (getline(ifs, str)) {
+    char buff[10];
+    snprintf(buff, sizeof(buff), "%.3f", std::stof(str));
+    highScores[i] = std::stof(std::string(buff));
+    i++;
+  }
+}
+
+void Result::writeHighScore(std::string filepath) {
+  std::ofstream ofs(filepath);
+  for (int i = 0; i < 5; i++) {
+    ofs << highScores[i] << '\n';
+  }
 }
 
 void Result::RenderText(Shader &s, std::string text, GLfloat x, GLfloat y,
