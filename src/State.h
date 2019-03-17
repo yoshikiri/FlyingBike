@@ -12,7 +12,6 @@ public:
   virtual ~State(){}
 
   virtual State *update() = 0;
-  // virtual std::unique_ptr<State> update() = 0;
 
   GLFWwindow *window;
 };

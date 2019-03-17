@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <glm/glm.hpp>
-#include <iostream>
 #include <iterator>
 #include <vector>
 
@@ -34,7 +33,7 @@ public:
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(),
                  &indices[0], GL_STATIC_DRAW);
 
-    /* attribute変数の取り出し方を指定 */
+    // set how to get attribute
     // position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void *)(offsetof(Vertex, position)));
@@ -52,18 +51,6 @@ public:
       glEnableVertexAttribArray(2);
     }
   }
-
-  // // コピーコンストラクタ
-  // Figure(const Figure &f) : vao(f.vao), vbo(f.vbo), ibo(f.ibo), mode(f.mode) {
-  //   // std::cout << "/* copy */" << '\n';
-  //   vertices.resize(f.vertices.size());
-  //   indices.resize(f.indices.size());
-  //   textureCoords.resize(f.textureCoords.size());
-  //   copy(f.vertices.begin(), f.vertices.end(), back_inserter(vertices));
-  //   copy(f.indices.begin(), f.indices.end(), back_inserter(vertices));
-  //   copy(f.textureCoords.begin(), f.textureCoords.end(),
-  //        back_inserter(vertices));
-  // }
 
   ~Figure() {
     glDeleteVertexArrays(1, &vao);

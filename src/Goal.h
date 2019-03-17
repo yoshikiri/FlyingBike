@@ -1,6 +1,7 @@
 #ifndef GOAL_H
 #define GOAL_H
 
+#include <GL/glew.h>
 #include <glm/glm.hpp>
 
 #include "Circle.h"
@@ -11,7 +12,6 @@ public:
 
   void checkClear();
 
-// private:
   glm::vec3 color;
   bool isClear;
 };

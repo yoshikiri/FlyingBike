@@ -14,10 +14,9 @@ public:
       exit(1);
     }
 
-    // windowを対象にする
     glfwMakeContextCurrent(window);
 
-    // GLEWを初期化する
+    // init GLEW
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
       std::cerr << "cannot init GLEW" << '\n';
@@ -26,7 +25,7 @@ public:
 
     glfwSwapInterval(1);
 
-    // windowに自身を示すポインタを登録
+    // set self pointer to window
     glfwSetWindowUserPointer(window, this);
 
     // set callback function for resize event
@@ -35,7 +34,6 @@ public:
     glfwSetScrollCallback(window, wheel);
 
     resize(window, width, height);
-
   }
 
   virtual ~Window() { glfwDestroyWindow(window); }
@@ -49,24 +47,24 @@ public:
     // glfwWaitEvents();
     glfwPollEvents();
 
-    // マウスカーソルの位置を取得
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) != GLFW_RELEASE) {
-      double x, y;
-      glfwGetCursorPos(window, &x, &y);
-      location[0] = static_cast<GLfloat>(x) * 2.0f / size[0] - 1.0f;
-      location[1] = -(static_cast<GLfloat>(y) * 2.0f / size[1] - 1.0f);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT) != GLFW_RELEASE) {
-      location[0] -= 2.0f / size[0];
-    } else if (glfwGetKey(window, GLFW_KEY_RIGHT) != GLFW_RELEASE) {
-      location[0] += 2.0f / size[0];
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) != GLFW_RELEASE) {
-      location[1] -= 2.0f / size[1];
-    } else if (glfwGetKey(window, GLFW_KEY_UP) != GLFW_RELEASE) {
-      location[1] += 2.0f / size[1];
-    }
+    // // マウスカーソルの位置を取得
+    // if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) != GLFW_RELEASE) {
+    //   double x, y;
+    //   glfwGetCursorPos(window, &x, &y);
+    //   location[0] = static_cast<GLfloat>(x) * 2.0f / size[0] - 1.0f;
+    //   location[1] = -(static_cast<GLfloat>(y) * 2.0f / size[1] - 1.0f);
+    // }
+    //
+    // if (glfwGetKey(window, GLFW_KEY_LEFT) != GLFW_RELEASE) {
+    //   location[0] -= 2.0f / size[0];
+    // } else if (glfwGetKey(window, GLFW_KEY_RIGHT) != GLFW_RELEASE) {
+    //   location[0] += 2.0f / size[0];
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_DOWN) != GLFW_RELEASE) {
+    //   location[1] -= 2.0f / size[1];
+    // } else if (glfwGetKey(window, GLFW_KEY_UP) != GLFW_RELEASE) {
+    //   location[1] += 2.0f / size[1];
+    // }
   }
 
   GLfloat getAspect() const { return aspect; }

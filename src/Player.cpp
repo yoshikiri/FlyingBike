@@ -1,7 +1,6 @@
 #include "Player.h"
 
 #include "DrawFigure.h"
-// #include "textureManager.h"
 
 namespace {
 const float MAX_SPEED = 0.05f;

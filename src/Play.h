@@ -2,10 +2,10 @@
 #define PLAY_H
 
 #include <GL/glew.h>
-
 #include <glm/glm.hpp>
 #include <memory>
 
+#include "State.h"
 
 class Player;
 class Container;
@@ -20,7 +20,6 @@ template <class T> class allocator;
 template <class T, class Allocator> class vector;
 } // namespace std
 
-#include "State.h"
 
 class Play : public State {
 public:
@@ -29,14 +28,11 @@ public:
   ~Play();
 
   State *update() override;
-  // std::unique_ptr<State> update() override;
-
 
 private:
   std::unique_ptr<Player> player;
   std::unique_ptr<std::vector<Container, std::allocator<Container>>> containers;
   std::unique_ptr<std::vector<Goal, std::allocator<Goal>>> goals;
-  std::unique_ptr<Shader> lightShader;
   std::unique_ptr<Shader> objectShader;
   std::unique_ptr<Shader> skyboxShader;
   std::unique_ptr<Shader> textShader;
@@ -46,20 +42,12 @@ private:
   const unsigned int stage;
   bool isSettingTarget;
   const float startTime;
-  // std::unique_ptr<irrklang::ISoundEngine *> soundEngine;
 
   void draw();
-
   void updatePlayer();
-
   State *checkGameEnd();
-
   void initShaders();
-
   void updateShaders();
-
-  void RenderText(Shader &s, std::string text, GLfloat x, GLfloat y,
-                  GLfloat scale, glm::vec3 color);
 };
 
 #endif

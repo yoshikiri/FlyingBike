@@ -1,5 +1,6 @@
 #include "Title.h"
 
+#include <glm/gtc/matrix_transform.hpp>
 #include <irrKlang/irrKlang.h>
 #include <stb_image.h>
 
@@ -13,7 +14,6 @@ auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
     irrklang::createIrrKlangDevice());
 
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
-// const glm::vec3 cameraPositionPlay(0.0f, 5.0f, 5.0f);
 const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
 const glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 const float WIDTH = 800.0f;
@@ -80,13 +80,13 @@ Title::Title(GLFWwindow *window)
   for (int i = 0; i < 10; i++) {
     char buff[5];
     snprintf(buff, sizeof(buff), "%d", i);
-    numberTextures[i] = loadTexture(std::string("resource/number_result/") +
+    numberTextures[i] = loadTexture(std::string("resource/image/number_result/") +
                                     std::string(buff) + ".png");
   }
 
-  titleTextures[0] = loadTexture("resource/title.png");
-  titleTextures[1] = loadTexture("resource/guide_title.png");
-  titleTextures[2] = loadTexture("resource/stage.png");
+  titleTextures[0] = loadTexture("resource/image/title.png");
+  titleTextures[1] = loadTexture("resource/image/guide_title.png");
+  titleTextures[2] = loadTexture("resource/image/stage.png");
 
   initShaders();
   glfwSetKeyCallback(window, key_callback);
@@ -100,27 +100,33 @@ Title::Title(GLFWwindow *window)
 State *Title::update() {
   State *next = this;
 
+  // start game
   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
-    (*soundEngine)->play2D("resource/Music/se_maoudamashii_onepoint17.ogg", false);
+    (*soundEngine)
+        ->play2D("resource/sound/se_maoudamashii_onepoint17.ogg", false);
     next = new Play(window, stage);
+
+    // stage select
   } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
     curTime = glfwGetTime();
     if (curTime > preTime + INTERVAL) {
-      (*soundEngine)->play2D("resource/Music/se_maoudamashii_system44.ogg", false);
+      (*soundEngine)
+          ->play2D("resource/sound/se_maoudamashii_system44.ogg", false);
       stage = (stage + 1) % STAGE_NUM;
       preTime = curTime;
     }
   } else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
     curTime2 = glfwGetTime();
     if (curTime2 > preTime2 + INTERVAL) {
-      (*soundEngine)->play2D("resource/Music/se_maoudamashii_system44.ogg", false);
+      (*soundEngine)
+          ->play2D("resource/sound/se_maoudamashii_system44.ogg", false);
       stage = (stage + (STAGE_NUM - 1)) % STAGE_NUM;
       preTime2 = curTime2;
     }
   }
 
-  draw();
   updateShaders();
+  draw();
 
   return next;
 }
@@ -139,12 +145,12 @@ void Title::draw() {
   // draw key guide
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, titleTextures[1]);
-  DrawFigure::drawPlane(glm::vec3(1.2, 4.5, 0), glm::vec2(11, 1));
+  DrawFigure::drawPlane(glm::vec3(1.2, 3.5, 0), glm::vec2(11, 2));
 
   // draw stage
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, titleTextures[2]);
-  DrawFigure::drawPlane(glm::vec3(1.5, 0, 0), glm::vec2(6, 2));
+  DrawFigure::drawPlane(glm::vec3(4.5, 0, 0), glm::vec2(6, 2));
 
   // draw stage number
   glActiveTexture(GL_TEXTURE0);
@@ -152,7 +158,7 @@ void Title::draw() {
   glm::mat4 model =
       glm::rotate(glm::mat4(1.0f), (float)M_PI, glm::vec3(0, 1, 0));
   objectShader->setMat4("model", model);
-  DrawFigure::drawPlane(glm::vec3(2.5, -0.2, 0), glm::vec2(2, 2));
+  DrawFigure::drawPlane(glm::vec3(-1.0, -0.2, 0), glm::vec2(2, 2), true);
   objectShader->setMat4("model", glm::mat4(1.0f));
 }
 
@@ -171,7 +177,7 @@ void Title::initShaders() {
   objectShader->setFloat("material.shininess", 32.0f);
 
   // directional light
-  objectShader->setVec3("dirLight.direction", 0.0f, 0.0f, 0.3f);
+  objectShader->setVec3("dirLight.direction", 0.0f, 0.0f, -0.3f);
   objectShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
   objectShader->setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
   objectShader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);

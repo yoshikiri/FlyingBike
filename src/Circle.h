@@ -1,6 +1,7 @@
 #ifndef CIRCLE_H
 #define CIRCLE_H
 
+#include <GL/glew.h>
 #include <glm/glm.hpp>
 
 class Circle {

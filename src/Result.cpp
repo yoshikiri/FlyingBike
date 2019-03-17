@@ -9,9 +9,6 @@
 #include <stb_image.h>
 #include <string>
 
-#include <freetype2/ft2build.h>
-#include FT_FREETYPE_H
-
 #include "Camera.h"
 #include "DrawFigure.h"
 #include "Figure.h"
@@ -64,11 +61,10 @@ auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
     irrklang::createIrrKlangDevice());
 
 std::string highScoreFile[] = {
-    "resource/HighScore0.txt", "resource/HighScore1.txt",
-    "resource/HighScore2.txt", "resource/HighScore3.txt"};
+    "resource/data/HighScore0.txt", "resource/data/HighScore1.txt",
+    "resource/data/HighScore2.txt", "resource/data/HighScore3.txt"};
 
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
-// const glm::vec3 cameraPositionPlay(0.0f, 5.0f, 5.0f);
 const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
 const glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 const float WIDTH = 800.0f;
@@ -94,23 +90,23 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
 
   if (isClear)
     (*soundEngine)
-        ->play2D("resource/Music/se_maoudamashii_jingle05.ogg", false);
+        ->play2D("resource/sound/se_maoudamashii_jingle05.ogg", false);
   else
     (*soundEngine)
-        ->play2D("resource/Music/se_maoudamashii_jingle02.ogg", false);
+        ->play2D("resource/sound/se_maoudamashii_jingle02.ogg", false);
 
   for (int i = 0; i < 10; i++) {
     char buff[5];
     snprintf(buff, sizeof(buff), "%d", i);
-    numberTextures[i] = loadTexture(std::string("resource/number_result/") +
+    numberTextures[i] = loadTexture(std::string("resource/image/number_result/") +
                                     std::string(buff) + ".png");
   }
-  numberTextures[10] = loadTexture("resource/number_result/period.png");
+  numberTextures[10] = loadTexture("resource/image/number_result/period.png");
 
-  resultTextures[0] = loadTexture("resource/clear.png");
-  resultTextures[1] = loadTexture("resource/failure.png");
-  resultTextures[2] = loadTexture("resource/new.png");
-  resultTextures[3] = loadTexture("resource/guide_result.png");
+  resultTextures[0] = loadTexture("resource/image/clear.png");
+  resultTextures[1] = loadTexture("resource/image/failure.png");
+  resultTextures[2] = loadTexture("resource/image/new.png");
+  resultTextures[3] = loadTexture("resource/image/guide_result.png");
 
   initShaders();
 
@@ -137,63 +133,10 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
   }
 
   writeHighScore(highScoreFile[stage]);
-
-  // FT_Library ft;
-  // if (FT_Init_FreeType(&ft))
-  //   std::cout << "ERROR::FREETYPE: Could not init FreeType Library"
-  //             << std::endl;
-  //
-  // FT_Face face;
-  // if (FT_New_Face(ft, "resource/fonts/FreeMono.ttf", 0, &face))
-  //   std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-  //
-  // FT_Set_Pixel_Sizes(face, 0, 48);
-  // if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
-  //   std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-  //
-  // glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment
-  // restriction
-  //
-  // for (GLubyte c = 0; c < 128; c++) {
-  //   // Load character glyph
-  //   if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-  //     std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-  //     continue;
-  //   }
-  //   // Generate texture
-  //   GLuint texture;
-  //   glGenTextures(1, &texture);
-  //   glBindTexture(GL_TEXTURE_2D, texture);
-  //   glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width,
-  //                face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE,
-  //                face->glyph->bitmap.buffer);
-  //   // Set texture options
-  //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //   // Now store character for later use
-  //   Character character = {
-  //       texture,
-  //       glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-  //       glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-  //       static_cast<GLuint>(face->glyph->advance.x)};
-  //   characters.insert(std::pair<GLchar, Character>(c, character));
-  // }
-  //
-  // FT_Done_Face(face);
-  // FT_Done_FreeType(ft);
-  //
-  // glEnable(GL_BLEND);
-  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //
-  // textShader->setMat4("projection", glm::ortho(-40.0f, 40.0f,
-  // -30.0f, 30.0f));
 }
 
 State *Result::update() {
   State *next = this;
-  // std::unique_ptr<State> a(this);
 
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
     next = new Title(window);
@@ -253,7 +196,6 @@ void Result::initShaders() {
   objectShader->setVec3("viewPos", camera->getPosition());
   objectShader->setFloat("material.shininess", 32.0f);
 
-  // directional light
   objectShader->setVec3("dirLight.direction", 0.0f, 0.0f, 0.3f);
   objectShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
   objectShader->setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
@@ -272,7 +214,6 @@ void Result::drawScore(glm::vec2 pos, float score) {
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glm::mat4 model(glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0)));
-  // objectShader->setMat4("model")
   model = glm::rotate(model, (float)M_PI, glm::vec3(0, 1, 0));
   objectShader->setMat4("model", model);
 
@@ -323,59 +264,4 @@ void Result::writeHighScore(std::string filepath) {
   for (int i = 0; i < 5; i++) {
     ofs << highScores[i] << '\n';
   }
-}
-
-void Result::RenderText(Shader &s, std::string text, GLfloat x, GLfloat y,
-                        GLfloat scale, glm::vec3 color) {
-  GLuint VAO, VBO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glBindVertexArray(VAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-  // Activate corresponding render state
-  s.use();
-  s.setVec3("textColor", color.x, color.y, color.z);
-  // glUniform3f(
-  //    glGetUniformLocation(s.program, "textColor"), color.x, color.y,
-  //    color.z);
-  glActiveTexture(GL_TEXTURE0);
-  glBindVertexArray(VAO);
-
-  // Iterate through all characters
-  std::string::const_iterator c;
-  for (c = text.begin(); c != text.end(); c++) {
-    Character ch = characters[*c];
-
-    GLfloat xpos = x + ch.bearing.x * scale;
-    GLfloat ypos = y - (ch.size.y - ch.bearing.y) * scale;
-
-    GLfloat w = ch.size.x * scale;
-    GLfloat h = ch.size.y * scale;
-    // Update VBO for each character
-    GLfloat vertices[6][4] = {
-        {xpos, ypos + h, 0.0, 0.0},    {xpos, ypos, 0.0, 1.0},
-        {xpos + w, ypos, 1.0, 1.0},
-
-        {xpos, ypos + h, 0.0, 0.0},    {xpos + w, ypos, 1.0, 1.0},
-        {xpos + w, ypos + h, 1.0, 0.0}};
-    // Render glyph texture over quad
-    glBindTexture(GL_TEXTURE_2D, ch.textureID);
-    // Update content of VBO memory
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // Render quad
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    // Now advance cursors for next glyph (note that advance is number of 1/64
-    // pixels)
-    x += (ch.advance >> 6) *
-         scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
-  }
-  glBindVertexArray(0);
-  glBindTexture(GL_TEXTURE_2D, 0);
 }

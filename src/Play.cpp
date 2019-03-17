@@ -1,16 +1,11 @@
 #include "Play.h"
 
-// #include <glm/glm.hpp>
 #include <cstdio>
 #include <irrKlang/irrKlang.h>
 #include <map>
 #include <stb_image.h>
 #include <unistd.h>
 #include <vector>
-
-// #include <future>
-// #include <thread>
-// #include <ctime>
 
 #include "Camera.h"
 #include "Container.h"
@@ -19,9 +14,6 @@
 #include "Player.h"
 #include "Result.h"
 #include "Shader.h"
-
-#include <freetype2/ft2build.h>
-#include FT_FREETYPE_H
 
 struct Character {
   GLuint textureID;
@@ -40,55 +32,39 @@ int target = 0;
 std::vector<Goal> targets;
 
 const glm::vec3 playerStartPosition[] = {
-  glm::vec3(3, -0.5, 0.5),
-  glm::vec3(3, 0.5, 0.5),
-  glm::vec3(-2, -3.5, 0.5),
-  glm::vec3(-2, 3.5, 0.5),
+    glm::vec3(3, -0.5, 0.5),
+    glm::vec3(3, 0.5, 0.5),
+    glm::vec3(-2, -3.5, 0.5),
+    glm::vec3(-2, 3.5, 0.5),
 };
 
 const glm::vec3 containerPositions[][4] = {
 
-    {glm::vec3(0.0f, 0.0f, 0.5f),
-    glm::vec3(2.5f, 1.5f, 0.5f),
-    glm::vec3(-1.0f, 1.0f, 0.5f),
-    glm::vec3(-2.0f, -2.0f, 0.5f)},
+    {glm::vec3(0.0f, 0.0f, 0.5f), glm::vec3(2.5f, 1.5f, 0.5f),
+     glm::vec3(-1.0f, 1.0f, 0.5f), glm::vec3(-2.0f, -2.0f, 0.5f)},
 
-    {glm::vec3(1.0f, 0.0f, 0.5f),
-    glm::vec3(3.5f, 1.5f, 0.5f),
-    glm::vec3(-2.0f, 2.0f, 0.5f),
-    glm::vec3(-3.0f, -2.0f, 0.5f)},
+    {glm::vec3(1.0f, 0.0f, 0.5f), glm::vec3(3.5f, 1.5f, 0.5f),
+     glm::vec3(-2.0f, 2.0f, 0.5f), glm::vec3(-3.0f, -2.0f, 0.5f)},
 
-    {glm::vec3(1.0f, 0.0f, 0.5f),
-    glm::vec3(2.0f, 1.0f, 0.5f),
-    glm::vec3(3.0f, 2.0f, 0.5f),
-    glm::vec3(4.0f, 3.0f, 0.5f)},
+    {glm::vec3(1.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.0f, 0.5f),
+     glm::vec3(3.0f, 2.0f, 0.5f), glm::vec3(4.0f, 3.0f, 0.5f)},
 
-    {glm::vec3(-1.0f, 0.0f, 0.5f),
-    glm::vec3(-3.5f, 1.5f, 0.5f),
-    glm::vec3(4.0f, 2.0f, 0.5f),
-    glm::vec3(5.0f, -2.0f, 0.5f)},
+    {glm::vec3(-1.0f, 0.0f, 0.5f), glm::vec3(-3.5f, 1.5f, 0.5f),
+     glm::vec3(4.0f, 2.0f, 0.5f), glm::vec3(5.0f, -2.0f, 0.5f)},
 };
 
 const glm::vec3 goalPositions[][4] = {
-    {glm::vec3(-1.0f, 0.0f, 0.5f),
-    glm::vec3(2.0f, 1.5f, 0.5f),
-    glm::vec3(-3.0f, 1.0f, 0.5f),
-    glm::vec3(-2.0f, -3.0f, 0.5f)},
+    {glm::vec3(-1.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.5f, 0.5f),
+     glm::vec3(-3.0f, 1.0f, 0.5f), glm::vec3(-2.0f, -3.0f, 0.5f)},
 
-    {glm::vec3(-3.0f, 0.0f, 0.5f),
-    glm::vec3(2.0f, 1.5f, 0.5f),
-    glm::vec3(-3.0f, 1.0f, 0.5f),
-    glm::vec3(2.0f, -3.0f, 0.5f)},
+    {glm::vec3(-3.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.5f, 0.5f),
+     glm::vec3(-3.0f, 1.0f, 0.5f), glm::vec3(2.0f, -3.0f, 0.5f)},
 
-    {glm::vec3(2.0f, 0.0f, 0.5f),
-    glm::vec3(2.0f, 1.0f, 0.5f),
-    glm::vec3(3.0f, 2.0f, 0.5f),
-    glm::vec3(3.0f, 3.0f, 0.5f)},
+    {glm::vec3(2.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.0f, 0.5f),
+     glm::vec3(3.0f, 2.0f, 0.5f), glm::vec3(3.0f, 3.0f, 0.5f)},
 
-    {glm::vec3(-3.0f, 0.0f, 0.5f),
-    glm::vec3(-4.0f, 1.5f, 0.5f),
-    glm::vec3(-3.0f, 1.0f, 0.5f),
-    glm::vec3(-3.0f, -3.0f, 0.5f)},
+    {glm::vec3(-3.0f, 0.0f, 0.5f), glm::vec3(-4.0f, 1.5f, 0.5f),
+     glm::vec3(-3.0f, 1.0f, 0.5f), glm::vec3(-3.0f, -3.0f, 0.5f)},
 };
 
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
@@ -102,21 +78,26 @@ const int NUM_SPOT_LIGHTS = 4;
 const int MAX_TARGETS = 10;
 
 const std::string fileObjectTextures[][6] = {
-    {"resource/poly.png", "resource/container2_specular.png",
-     "resource/container2.png", "resource/container2_specular.png",
-     "resource/wood-texture.png", "resource/one.png"},
+    {"resource/image/poly.png", "resource/image/container2_specular.png",
+     "resource/image/container2.png",
+     "resource/image/container2_specular.png",
+     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
 
-    {"resource/poly.png", "resource/container2_specular.png",
-     "resource/container2.png", "resource/container2_specular.png",
-     "resource/wood-texture.png", "resource/one.png"},
+    {"resource/image/poly.png", "resource/image/container2_specular.png",
+     "resource/image/container2.png",
+     "resource/image/container2_specular.png",
+     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
 
-    {"resource/poly.png", "resource/container2_specular.png",
-     "resource/container2.png", "resource/container2_specular.png",
-     "resource/wood-texture.png", "resource/one.png"},
+    {"resource/image/poly.png", "resource/image/container2_specular.png",
+     "resource/image/container2.png",
+     "resource/image/container2_specular.png",
+     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
 
-    {"resource/poly.png", "resource/container2_specular.png",
-     "resource/container2.png", "resource/container2_specular.png",
-     "resource/wood-texture.png", "resource/one.png"},
+    {"resource/image/poly.png", "resource/image/container2_specular.png",
+     "resource/image/container2.png",
+     "resource/image/container2_specular.png",
+     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
+
 };
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
@@ -132,7 +113,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     float ty = (y - 300) / 50.0f;
     targets.emplace_back(glm::vec3(tx, ty, 0.5f), 0.01);
     (*soundEngine)
-        ->play2D("resource/Music/se_maoudamashii_system44.ogg", false);
+        ->play2D("resource/sound/se_maoudamashii_system44.ogg", false);
   }
   // delete last added target
   else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
@@ -181,8 +162,6 @@ Play::Play(GLFWwindow *window, unsigned int stage)
       containers(std::make_unique<
                  std::vector<Container, std::allocator<Container>>>()),
       goals(std::make_unique<std::vector<Goal, std::allocator<Goal>>>()),
-      lightShader(std::make_unique<Shader>("resource/shader/light.vert",
-                                           "resource/shader/light.frag")),
       objectShader(std::make_unique<Shader>(
           "resource/shader/directionalAndSpotLightObject.vert",
           "resource/shader/directionalAndSpotLightObject.frag")),
@@ -205,11 +184,11 @@ Play::Play(GLFWwindow *window, unsigned int stage)
     char buff[5];
     snprintf(buff, sizeof(buff), "%d", i);
     numberTextures[i] = loadTexture(
-        std::string("resource/number/") + std::string(buff) + ".png", true);
+        std::string("resource/image/target/") + std::string(buff) + ".png", true);
   }
 
-  player =
-      std::make_unique<Player>(playerStartPosition[stage], objectTextures[0], objectTextures[1]);
+  player = std::make_unique<Player>(playerStartPosition[stage],
+                                    objectTextures[0], objectTextures[1]);
 
   for (glm::vec3 p : containerPositions[stage])
     containers->emplace_back(p, glm::vec3(1.0f), objectTextures[2],
@@ -224,17 +203,6 @@ Play::Play(GLFWwindow *window, unsigned int stage)
 
   glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-  // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-  //   player->velocity.x += 0.001;
-  // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-  //   player->velocity.x -= 0.001;
-  // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-  //   player->velocity.y += 0.001;
-  // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-  //   player->velocity.y -= 0.001;
-
-  // textShader->setMat4("projection", glm::ortho(-40.0f, 40.0f,
-  // -30.0f, 30.0f));
   textShader->setMat4("projection", camera->getProjection());
 }
 
@@ -251,11 +219,11 @@ State *Play::update() {
     next = new Result(window, (glfwGetTime() - startTime), false, stage);
 
   if (isSettingTarget) {
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    if (targets.size() > 0 && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
       isSettingTarget = false;
       glfwSetMouseButtonCallback(window, 0);
       (*soundEngine)
-          ->play2D("resource/Music/se_maoudamashii_system13.ogg", false);
+          ->play2D("resource/sound/se_maoudamashii_system13.ogg", false);
     }
   } else {
 
@@ -265,7 +233,6 @@ State *Play::update() {
 
   draw();
   updateShaders();
-  // textShader->setMat4("projection", camera->getProjection());
   return next;
 }
 
@@ -300,13 +267,6 @@ void Play::draw() {
 
   // draw player
   player->draw();
-
-  // glEnable(GL_BLEND);
-  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  // RenderText(*textShader, "This is sample text", 0.0f, 0.0f, 1.0f,
-  //            glm::vec3(0.5f, 0.8f, 0.2f));
-  // RenderText(*textShader, "(C) LearnOpenGL.com", 2.0f, 2.0f, 0.5f,
-  //            glm::vec3(0.3, 0.7f, 0.9f));
 }
 
 void Play::updatePlayer() {
@@ -326,7 +286,7 @@ void Play::updatePlayer() {
         continue;
 
       (*soundEngine)
-          ->play2D("resource/Music/se_maoudamashii_system46.ogg", false);
+          ->play2D("resource/sound/se_maoudamashii_system46.ogg", false);
     }
   }
 
@@ -386,8 +346,8 @@ void Play::initShaders() {
   for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
     char buff[30];
     snprintf(buff, sizeof(buff), "spotLights[%d].position", i);
-    objectShader->setVec3(std::string(buff),
-                          goalPositions[stage][i] + glm::vec3(0.0f, 0.0f, 1.5f));
+    objectShader->setVec3(std::string(buff), goalPositions[stage][i] +
+                                                 glm::vec3(0.0f, 0.0f, 1.5f));
     snprintf(buff, sizeof(buff), "spotLights[%d].direction", i);
     objectShader->setVec3(std::string(buff), glm::vec3(0.0f, 0.0f, -1.0f));
     snprintf(buff, sizeof(buff), "spotLights[%d].ambient", i);
@@ -420,63 +380,4 @@ void Play::updateShaders() {
     snprintf(buff, sizeof(buff), "spotLights[%d].ambient", i);
     objectShader->setVec3(std::string(buff), (*goals)[i].color);
   }
-}
-
-void Play::RenderText(Shader &s, std::string text, GLfloat x, GLfloat y,
-                      GLfloat scale, glm::vec3 color) {
-  GLuint VAO, VBO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glBindVertexArray(VAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-  // Activate corresponding render state
-  s.use();
-  s.setVec3("textColor", color.x, color.y, color.z);
-  textShader->setMat4("projection", camera->getProjection());
-
-  // glUniform3f(
-  //    glGetUniformLocation(s.program, "textColor"), color.x, color.y,
-  //    color.z);
-  glActiveTexture(GL_TEXTURE0);
-  glBindVertexArray(VAO);
-
-  // Iterate through all characters
-  std::string::const_iterator c;
-  for (c = text.begin(); c != text.end(); c++) {
-    Character ch = characters[*c];
-
-    GLfloat xpos = x + ch.bearing.x * scale;
-    GLfloat ypos = y - (ch.size.y - ch.bearing.y) * scale;
-
-    GLfloat w = ch.size.x * scale;
-    GLfloat h = ch.size.y * scale;
-    // Update VBO for each character
-    GLfloat vertices[6][4] = {
-        {xpos, ypos + h, 0.0, 0.0},    {xpos, ypos, 0.0, 1.0},
-        {xpos + w, ypos, 1.0, 1.0},
-
-        {xpos, ypos + h, 0.0, 0.0},    {xpos + w, ypos, 1.0, 1.0},
-        {xpos + w, ypos + h, 1.0, 0.0}};
-
-    // Render glyph texture over quad
-    glBindTexture(GL_TEXTURE_2D, ch.textureID);
-    // Update content of VBO memory
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // Render quad
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    // Now advance cursors for next glyph (note that advance is number of 1/64
-    // pixels)
-    x += (ch.advance >> 6) *
-         scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
-  }
-  glBindVertexArray(0);
-  glBindTexture(GL_TEXTURE_2D, 0);
 }

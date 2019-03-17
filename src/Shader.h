@@ -2,12 +2,9 @@
 #define SHADER_H
 
 #include <GL/glew.h>
-// #include <GLFW/glfw3.h>
-
 #include <cstdlib>
 #include <fstream>
 #include <glm/glm.hpp>
-// #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <sstream>
@@ -47,13 +44,13 @@ public:
   }
 
   const GLuint program;
-private:
 
+private:
   bool readShaderSource(const char *file_path, std::vector<GLchar> &buffer) {
     if (file_path == NULL)
       return false;
 
-    // ソールファイルを開く
+    // open source file
     std::ifstream file(file_path, std::ios::binary);
     if (file.fail()) {
       std::cerr << "cannot open source file: " << file_path << '\n';
@@ -78,21 +75,18 @@ private:
     return true;
   }
 
-  // シェーダオブジェクトのコンパイル結果を表示する
-  // shader: シェーダオブジェクト名
-  // str: コンパイルエラーが発生した場所を示す文字列
+  // print result of shader compile
   GLboolean printShaderInfoLog(GLuint shader, const char *str) {
-    // コンパイル結果を取得する
+    // get compile result
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE)
       std::cerr << "Compile Error in " << str << std::endl;
 
-    // シェーダのコンパイル時のログの長さを取得する
+    // get length of log
     GLsizei bufSize;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &bufSize);
     if (bufSize > 1) {
-      // シェーダのコンパイル時のログの内容を取得する
       std::vector<GLchar> infoLog(bufSize);
       GLsizei length;
       glGetShaderInfoLog(shader, bufSize, &length, &infoLog[0]);
@@ -101,20 +95,18 @@ private:
     return static_cast<GLboolean>(status);
   }
 
-  // プログラムオブジェクトのリンク結果を表示する
-  // program: プログラムオブジェクト名
+  // print result of program object link
   GLboolean printProgramInfoLog(GLuint program) {
-    // リンク結果を取得する
+    // get result of link
     GLint status;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
     if (status == GL_FALSE)
       std::cerr << "Link Error." << std::endl;
 
-    // シェーダのリンク時のログの長さを取得する
+    // get length of log
     GLsizei bufSize;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufSize);
     if (bufSize > 1) {
-      // シェーダのリンク時のログの内容を取得する
       std::vector<GLchar> infoLog(bufSize);
       GLsizei length;
       glGetProgramInfoLog(program, bufSize, &length, &infoLog[0]);
@@ -123,6 +115,7 @@ private:
     return static_cast<GLboolean>(status);
   }
 
+  // create vertex/fragment shader
   GLuint createProgram(const char *vsrc, const char *fsrc) {
     const GLuint program = glCreateProgram();
 
@@ -131,35 +124,30 @@ private:
       glShaderSource(vobj, 1, &vsrc, NULL);
       glCompileShader(vobj);
 
-      // バーテックスシェーダのシェーダオブジェクトをプログラムオブジェクトに組み込む
       if (printShaderInfoLog(vobj, "vertex shader"))
         glAttachShader(program, vobj);
       glDeleteShader(vobj);
     }
 
     if (fsrc != NULL) {
-      // フラグメントシェーダのシェーダオブジェクトを作成する
       const GLuint fobj(glCreateShader(GL_FRAGMENT_SHADER));
       glShaderSource(fobj, 1, &fsrc, NULL);
       glCompileShader(fobj);
-      // フラグメントシェーダのシェーダオブジェクトをプログラムオブジェクトに組み込む
       if (printShaderInfoLog(fobj, "fragment shader"))
         glAttachShader(program, fobj);
       glDeleteShader(fobj);
     }
 
-    // プログラムオブジェクトをリンクする
+    // link program object
     glBindAttribLocation(program, 0, "position");
     glBindAttribLocation(program, 1, "color");
     glBindAttribLocation(program, 2, "texture");
     glBindFragDataLocation(program, 0, "fragment");
     glLinkProgram(program);
 
-    // 作成したプログラムオブジェクトを返す
     if (printProgramInfoLog(program))
       return program;
 
-    // プログラムオブジェクトが作成できなければ 0 を返す
     glDeleteProgram(program);
     return 0;
   }

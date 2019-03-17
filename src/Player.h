@@ -14,18 +14,13 @@ public:
          unsigned int specularTextureID);
 
   void update();
-
   void seek(const glm::vec3 target);
-
   void checkCollision(const AABB &obj);
-
   bool checkGoal(Goal &obj);
-
   void applyForce(const glm::vec3 force);
-
   void draw();
 
-// private:
+private:
   glm::vec3 velocity;
   glm::vec3 acceleration;
 
