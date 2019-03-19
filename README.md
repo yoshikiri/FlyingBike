@@ -1,3 +1,6 @@
+![play](https://github.com/yoshikiri/TrackMaker/blob/master/resource/thumbnail/play.png)
+
+
 # TrackMaker
 Simple game made with OpenGL and GLFW.
 
@@ -24,6 +27,8 @@ Simple game made with OpenGL and GLFW.
 1. Click mouse left button to add targets.
 1. Press Enter to start moving phase.
 1. Checked all goals to clear and challenge best time.
+
+![result](https://github.com/yoshikiri/TrackMaker/blob/master/resource/thumbnail/result.png)
 
 # Licence
 This software is released under the MIT License, see LICENSE.
