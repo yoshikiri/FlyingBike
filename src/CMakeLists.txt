@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(FlyingBike CXX)
+project(TrackMaker CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-pthread")
 
@@ -13,6 +13,6 @@ find_package(GLEW REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 link_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 
-add_executable(FlyingBike main.cpp Camera.cpp Player.cpp Container.cpp Goal.cpp Title.cpp Play.cpp Result.cpp)
+add_executable(TrackMaker main.cpp Camera.cpp Player.cpp Container.cpp Goal.cpp Title.cpp Play.cpp Result.cpp)
 
-target_link_libraries(FlyingBike ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} IrrKlang freetype assimp glfw3 openal Xrandr Xinerama Xcursor Xi Xxf86vm X11 rt m dl)
+target_link_libraries(TrackMaker ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} IrrKlang glfw3 Xrandr Xinerama Xcursor Xi Xxf86vm X11 rt m dl)

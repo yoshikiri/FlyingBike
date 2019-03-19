@@ -32,10 +32,10 @@ int target = 0;
 std::vector<Goal> targets;
 
 const glm::vec3 playerStartPosition[] = {
-    glm::vec3(3, -0.5, 0.5),
-    glm::vec3(3, 0.5, 0.5),
-    glm::vec3(-2, -3.5, 0.5),
-    glm::vec3(-2, 3.5, 0.5),
+    glm::vec3(4, 2.5, 0.5),
+    glm::vec3(-5, 3.0, 0.5),
+    glm::vec3(-3, -3.5, 0.5),
+    glm::vec3(0, 0, 0.5),
 };
 
 const glm::vec3 containerPositions[][4] = {
@@ -43,32 +43,31 @@ const glm::vec3 containerPositions[][4] = {
     {glm::vec3(0.0f, 0.0f, 0.5f), glm::vec3(2.5f, 1.5f, 0.5f),
      glm::vec3(-1.0f, 1.0f, 0.5f), glm::vec3(-2.0f, -2.0f, 0.5f)},
 
-    {glm::vec3(1.0f, 0.0f, 0.5f), glm::vec3(3.5f, 1.5f, 0.5f),
-     glm::vec3(-2.0f, 2.0f, 0.5f), glm::vec3(-3.0f, -2.0f, 0.5f)},
+    {glm::vec3(1.0f, -1.0f, 0.5f), glm::vec3(1.0f, 0.5f, 0.5f),
+     glm::vec3(1.0f, 2.0f, 0.5f), glm::vec3(1.0f, 3.5f, 0.5f)},
 
     {glm::vec3(1.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.0f, 0.5f),
-     glm::vec3(3.0f, 2.0f, 0.5f), glm::vec3(4.0f, 3.0f, 0.5f)},
+     glm::vec3(-3.0f, 2.0f, 0.5f), glm::vec3(4.0f, 3.0f, 0.5f)},
 
-    {glm::vec3(-1.0f, 0.0f, 0.5f), glm::vec3(-3.5f, 1.5f, 0.5f),
-     glm::vec3(4.0f, 2.0f, 0.5f), glm::vec3(5.0f, -2.0f, 0.5f)},
+    {glm::vec3(-3.0f, -3.0f, 0.5f), glm::vec3(-3.0f, 3.0f, 0.5f),
+     glm::vec3(3.0f, -3.0f, 0.5f), glm::vec3(3.0f, 3.0f, 0.5f)},
 };
 
 const glm::vec3 goalPositions[][4] = {
-    {glm::vec3(-1.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.5f, 0.5f),
-     glm::vec3(-3.0f, 1.0f, 0.5f), glm::vec3(-2.0f, -3.0f, 0.5f)},
+    {glm::vec3(-4.5f, -2.0f, 0.5f), glm::vec3(3.5f, -2.5f, 0.5f),
+     glm::vec3(-3.5f, 0.5f, 0.5f), glm::vec3(-2.0f, 3.0f, 0.5f)},
 
-    {glm::vec3(-3.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.5f, 0.5f),
-     glm::vec3(-3.0f, 1.0f, 0.5f), glm::vec3(2.0f, -3.0f, 0.5f)},
-
-    {glm::vec3(2.0f, 0.0f, 0.5f), glm::vec3(2.0f, 1.0f, 0.5f),
+    {glm::vec3(3.0f, 0.0f, 0.5f), glm::vec3(3.0f, 1.0f, 0.5f),
      glm::vec3(3.0f, 2.0f, 0.5f), glm::vec3(3.0f, 3.0f, 0.5f)},
 
-    {glm::vec3(-3.0f, 0.0f, 0.5f), glm::vec3(-4.0f, 1.5f, 0.5f),
-     glm::vec3(-3.0f, 1.0f, 0.5f), glm::vec3(-3.0f, -3.0f, 0.5f)},
+    {glm::vec3(1.0f, 1.0f, 0.5f), glm::vec3(2.0f, 3.0f, 0.5f),
+     glm::vec3(2.5f, -2.0f, 0.5f), glm::vec3(5.0f, -5.0f, 0.5f)},
+
+    {glm::vec3(-3.0f, 0.0f, 0.5f), glm::vec3(0.0f, 3.0f, 0.5f),
+     glm::vec3(3.0f, 0.0f, 0.5f), glm::vec3(0.0f, -3.0f, 0.5f)},
 };
 
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
-// const glm::vec3 cameraPositionPlay(0.0f, 5.0f, 5.0f);
 const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
 const glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 const float WIDTH = 800.0f;
@@ -77,27 +76,22 @@ const float HEIGHT = 600.0f;
 const int NUM_SPOT_LIGHTS = 4;
 const int MAX_TARGETS = 10;
 
-const std::string fileObjectTextures[][6] = {
-    {"resource/image/poly.png", "resource/image/container2_specular.png",
-     "resource/image/container2.png",
-     "resource/image/container2_specular.png",
-     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
+const std::string fileObjectTextures[][5] = {
+    {"resource/image/star_sky.png", "resource/image/star_sky.png",
+     "resource/image/danger_box.png", "resource/image/danger_box.png",
+     "resource/image/brick_four_tile_shadow.png"},
 
-    {"resource/image/poly.png", "resource/image/container2_specular.png",
-     "resource/image/container2.png",
-     "resource/image/container2_specular.png",
-     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
+    {"resource/image/star_sky.png", "resource/image/star_sky.png",
+     "resource/image/danger_box.png", "resource/image/danger_box.png",
+     "resource/image/brick_four_tile_shadow.png"},
 
-    {"resource/image/poly.png", "resource/image/container2_specular.png",
-     "resource/image/container2.png",
-     "resource/image/container2_specular.png",
-     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
+    {"resource/image/star_sky.png", "resource/image/star_sky.png",
+     "resource/image/danger_box.png", "resource/image/danger_box.png",
+     "resource/image/brick_four_tile_shadow.png"},
 
-    {"resource/image/poly.png", "resource/image/container2_specular.png",
-     "resource/image/container2.png",
-     "resource/image/container2_specular.png",
-     "resource/image/wood-texture.png", "resource/image/number_result/1.png"},
-
+    {"resource/image/star_sky.png", "resource/image/star_sky.png",
+     "resource/image/danger_box.png", "resource/image/danger_box.png",
+     "resource/image/brick_four_tile_shadow.png"},
 };
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
@@ -113,7 +107,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     float ty = (y - 300) / 50.0f;
     targets.emplace_back(glm::vec3(tx, ty, 0.5f), 0.01);
     (*soundEngine)
-        ->play2D("resource/sound/se_maoudamashii_system44.ogg", false);
+        ->play2D("resource/sound/se_add_target.ogg", false);
   }
   // delete last added target
   else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
@@ -183,8 +177,9 @@ Play::Play(GLFWwindow *window, unsigned int stage)
   for (int i = 0; i < 10; i++) {
     char buff[5];
     snprintf(buff, sizeof(buff), "%d", i);
-    numberTextures[i] = loadTexture(
-        std::string("resource/image/target/") + std::string(buff) + ".png", true);
+    numberTextures[i] = loadTexture(std::string("resource/image/target/") +
+                                        std::string(buff) + ".png",
+                                    true);
   }
 
   player = std::make_unique<Player>(playerStartPosition[stage],
@@ -213,17 +208,18 @@ Play::~Play() {
 
 State *Play::update() {
   State *next = this;
-  // std::unique_ptr<State> ne = std::make_unique<State>(this);
 
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     next = new Result(window, (glfwGetTime() - startTime), false, stage);
 
   if (isSettingTarget) {
-    if (targets.size() > 0 && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+    if (targets.size() > 0 &&
+        glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
       isSettingTarget = false;
       glfwSetMouseButtonCallback(window, 0);
       (*soundEngine)
-          ->play2D("resource/sound/se_maoudamashii_system13.ogg", false);
+          ->play2D("resource/sound/se_start_moving.ogg", false);
+      startTime = glfwGetTime();
     }
   } else {
 
@@ -286,7 +282,7 @@ void Play::updatePlayer() {
         continue;
 
       (*soundEngine)
-          ->play2D("resource/sound/se_maoudamashii_system46.ogg", false);
+          ->play2D("resource/sound/se_check_goal.ogg", false);
     }
   }
 
@@ -353,9 +349,9 @@ void Play::initShaders() {
     snprintf(buff, sizeof(buff), "spotLights[%d].ambient", i);
     objectShader->setVec3(std::string(buff), (*goals)[i].color);
     snprintf(buff, sizeof(buff), "spotLights[%d].diffuse", i);
-    objectShader->setVec3(std::string(buff), 1.0f, 1.0f, 1.0f);
+    objectShader->setVec3(std::string(buff), (*goals)[i].color);
     snprintf(buff, sizeof(buff), "spotLights[%d].specular", i);
-    objectShader->setVec3(std::string(buff), 1.0f, 1.0f, 1.0f);
+    objectShader->setVec3(std::string(buff), (*goals)[i].color);
     snprintf(buff, sizeof(buff), "spotLights[%d].constant", i);
     objectShader->setFloat(std::string(buff), 1.0f);
     snprintf(buff, sizeof(buff), "spotLights[%d].linear", i);
@@ -377,7 +373,10 @@ void Play::updateShaders() {
 
   for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
     char buff[30];
-    snprintf(buff, sizeof(buff), "spotLights[%d].ambient", i);
-    objectShader->setVec3(std::string(buff), (*goals)[i].color);
+    // if goal was cleared, delete light by changing direction
+    snprintf(buff, sizeof(buff), "spotLights[%d].direction", i);
+    objectShader->setVec3(std::string(buff),
+                          (*goals)[i].isClear ? glm::vec3(0.0f, 0.0f, 1.0f)
+                                              : glm::vec3(0.0f, 0.0f, -1.0f));
   }
 }

@@ -41,7 +41,7 @@ private:
   std::unique_ptr<unsigned int[]> numberTextures;
   const unsigned int stage;
   bool isSettingTarget;
-  const float startTime;
+  float startTime;
 
   void draw();
   void updatePlayer();

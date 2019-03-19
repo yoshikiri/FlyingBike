@@ -103,7 +103,7 @@ State *Title::update() {
   // start game
   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
     (*soundEngine)
-        ->play2D("resource/sound/se_maoudamashii_onepoint17.ogg", false);
+        ->play2D("resource/sound/se_start_play.ogg", false);
     next = new Play(window, stage);
 
     // stage select
@@ -111,7 +111,7 @@ State *Title::update() {
     curTime = glfwGetTime();
     if (curTime > preTime + INTERVAL) {
       (*soundEngine)
-          ->play2D("resource/sound/se_maoudamashii_system44.ogg", false);
+          ->play2D("resource/sound/se_select_stage.ogg", false);
       stage = (stage + 1) % STAGE_NUM;
       preTime = curTime;
     }
@@ -119,7 +119,7 @@ State *Title::update() {
     curTime2 = glfwGetTime();
     if (curTime2 > preTime2 + INTERVAL) {
       (*soundEngine)
-          ->play2D("resource/sound/se_maoudamashii_system44.ogg", false);
+          ->play2D("resource/sound/se_select_stage.ogg", false);
       stage = (stage + (STAGE_NUM - 1)) % STAGE_NUM;
       preTime2 = curTime2;
     }

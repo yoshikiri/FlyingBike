@@ -90,10 +90,10 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
 
   if (isClear)
     (*soundEngine)
-        ->play2D("resource/sound/se_maoudamashii_jingle05.ogg", false);
+        ->play2D("resource/sound/se_maoudamashii_jingle_clear.ogg", false);
   else
     (*soundEngine)
-        ->play2D("resource/sound/se_maoudamashii_jingle02.ogg", false);
+        ->play2D("resource/sound/se_maoudamashii_jingle_failure.ogg", false);
 
   for (int i = 0; i < 10; i++) {
     char buff[5];

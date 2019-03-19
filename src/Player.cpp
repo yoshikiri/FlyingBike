@@ -5,7 +5,7 @@
 namespace {
 const float MAX_SPEED = 0.05f;
 const float MAX_FORCE = 0.001f;
-const float LENGTH = 1.0f;
+const float LENGTH = 0.8f;
 } // namespace
 
 Player::Player()
@@ -74,5 +74,5 @@ void Player::draw() {
   glBindTexture(GL_TEXTURE_2D, diffuseTextureID);
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, specularTextureID);
-  DrawFigure::drawCube(center, glm::vec3(1.0));
+  DrawFigure::drawCube(center, glm::vec3(LENGTH));
 }
