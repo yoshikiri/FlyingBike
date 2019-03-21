@@ -2,7 +2,8 @@
 
 
 # TrackMaker
-Simple game made with OpenGL and GLFW.
+Simple game made with OpenGL and GLFW.  
+[Demo play movie on YouTube](https://youtu.be/pc5txYNgkhs)
 
 # Dependency
 - C++14
@@ -14,19 +15,19 @@ Simple game made with OpenGL and GLFW.
 - [irrKlang](https://www.ambiera.com/irrklang/)
 
 # Setup
-`git clone https://github.com/yoshikiri/TrackMaker.git`
-`cd TrackMaker`
-`mkdir build`
-`cd build`
-`cmake ..`
-`make`
-`./TrackMaker`
+`git clone https://github.com/yoshikiri/TrackMaker.git`  
+`cd TrackMaker/src`  
+`mkdir build`  
+`cd build`  
+`cmake ..`  
+`make`  
+`./TrackMaker`  
 
 # How to Play
-1. Choose stage and press Enter.
-1. Click mouse left button to add targets.
-1. Press Enter to start moving phase.
-1. Checked all goals to clear and challenge best time.
+1. Choose stage and press Enter.  
+1. Click mouse left button to add targets.  
+1. Press Enter to start moving phase.  
+1. Checked all goals to clear and challenge best time.  
 
 ![result](https://github.com/yoshikiri/TrackMaker/blob/master/resource/thumbnail/result.png)
 
