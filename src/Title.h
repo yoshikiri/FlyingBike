@@ -15,14 +15,14 @@ public:
   State *update() override;
 
 private:
-  std::unique_ptr<Shader> lightShader;
   std::unique_ptr<Shader> objectShader;
   std::unique_ptr<Camera> camera;
-  std::unique_ptr<unsigned int[]> numberTextures;
-  std::unique_ptr<unsigned int[]> titleTextures;
-  int stage;
 
-  void draw();
+  std::unique_ptr<unsigned int[]> titleTextures;
+  std::unique_ptr<unsigned int[]> numberTextures;
+  unsigned int stage;
+
+  void draw() const;
   void initShaders();
   void updateShaders();
 };

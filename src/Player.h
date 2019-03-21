@@ -18,7 +18,7 @@ public:
   void checkCollision(const AABB &obj);
   bool checkGoal(Goal &obj);
   void applyForce(const glm::vec3 force);
-  void draw();
+  void draw() const;
 
 private:
   glm::vec3 velocity;

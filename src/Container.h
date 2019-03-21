@@ -10,7 +10,7 @@ public:
 
   void update();
 
-  void draw();
+  void draw() const;
 
 private:
   unsigned int diffuseTextureID;
