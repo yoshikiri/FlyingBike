@@ -1,7 +1,7 @@
 #include "Result.h"
 
-#include "fstream"
 #include <algorithm>
+#include <fstream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <irrKlang/irrKlang.h>
@@ -16,14 +16,25 @@
 #include "Shader.h"
 #include "Title.h"
 
-struct Character {
-  GLuint textureID;
-  glm::ivec2 size;
-  glm::ivec2 bearing;
-  GLuint advance;
-};
-
 namespace {
+const float WIDTH = 800.0f;
+const float HEIGHT = 600.0f;
+const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
+const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
+const glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
+
+auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
+    irrklang::createIrrKlangDevice());
+
+const unsigned int HIGHSCORE_NUM = 5;
+
+std::string highScoreFile[] = {
+    "resource/data/HighScore0.txt", "resource/data/HighScore1.txt",
+    "resource/data/HighScore2.txt", "resource/data/HighScore3.txt"};
+
+std::map<std::string, int> TEXTURE_INDEX = {
+    {"clear", 0}, {"failure", 1}, {"new", 2}, {"guide_result", 3}};
+
 unsigned int loadTexture(std::string filename, bool useAlpha = true) {
   stbi_set_flip_vertically_on_load(false);
 
@@ -55,72 +66,53 @@ unsigned int loadTexture(std::string filename, bool useAlpha = true) {
   return textureID;
 }
 
-std::map<GLchar, Character> characters;
-
-auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
-    irrklang::createIrrKlangDevice());
-
-std::string highScoreFile[] = {
-    "resource/data/HighScore0.txt", "resource/data/HighScore1.txt",
-    "resource/data/HighScore2.txt", "resource/data/HighScore3.txt"};
-
-const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
-const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
-const glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
-const float WIDTH = 800.0f;
-const float HEIGHT = 600.0f;
 } // namespace
 
 Result::Result(GLFWwindow *window, float score, bool isClear,
                unsigned int stage)
     : State(window),
-      lightShader(std::make_unique<Shader>("resource/shader/light.vert",
-                                           "resource/shader/light.frag")),
+
       objectShader(
           std::make_unique<Shader>("resource/shader/directionalLight.vert",
                                    "resource/shader/directionalLight.frag")),
-      textShader(std::make_unique<Shader>("resource/shader/text.vert",
-                                          "resource/shader/text.frag")),
       camera(std::make_unique<Camera>(cameraPositionLookDown, cameraEye,
                                       cameraUp, WIDTH, HEIGHT, true)),
+      resultTextures(std::make_unique<unsigned int[]>(TEXTURE_INDEX.size())),
       numberTextures(std::make_unique<unsigned int[]>(11)),
-      resultTextures(std::make_unique<unsigned int[]>(4)), score(score),
-      highScores(std::make_unique<float[]>(5)), isClear(isClear), stage(stage),
-      updateHighScore(false) {
+      highScores(std::make_unique<float[]>(HIGHSCORE_NUM)), score(score),
+      isClear(isClear), stage(stage), updateHighScore(false) {
 
   if (isClear)
-    (*soundEngine)
-        ->play2D("resource/sound/se_maoudamashii_jingle_clear.ogg", false);
+    (*soundEngine)->play2D("resource/sound/se_jingle_clear.ogg", false);
   else
-    (*soundEngine)
-        ->play2D("resource/sound/se_maoudamashii_jingle_failure.ogg", false);
+    (*soundEngine)->play2D("resource/sound/se_jingle_failure.ogg", false);
 
+  // load textures
   for (int i = 0; i < 10; i++) {
     char buff[5];
     snprintf(buff, sizeof(buff), "%d", i);
-    numberTextures[i] = loadTexture(std::string("resource/image/number_result/") +
-                                    std::string(buff) + ".png");
+    numberTextures[i] =
+        loadTexture(std::string("resource/image/number_result/") +
+                    std::string(buff) + ".png");
   }
   numberTextures[10] = loadTexture("resource/image/number_result/period.png");
 
-  resultTextures[0] = loadTexture("resource/image/clear.png");
-  resultTextures[1] = loadTexture("resource/image/failure.png");
-  resultTextures[2] = loadTexture("resource/image/new.png");
-  resultTextures[3] = loadTexture("resource/image/guide_result.png");
+  for (auto p : TEXTURE_INDEX)
+    resultTextures[p.second] =
+        loadTexture("resource/image/" + p.first + ".png");
 
-  initShaders();
-
+  // load and update high scores
   loadHighScore(highScoreFile[stage]);
   std::vector<float> v;
   if (isClear)
     v.push_back(score);
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < HIGHSCORE_NUM; i++) {
     v.push_back(highScores[i]);
   }
 
   std::sort(v.begin(), v.end());
 
-  // new record
+  // check new record
   if (isClear) {
     if (v[4] != score)
       updateHighScore = true;
@@ -128,11 +120,12 @@ Result::Result(GLFWwindow *window, float score, bool isClear,
     v.erase(v.begin() + 5);
     for (int i = 0; i < 5; i++) {
       highScores[i] = v[i];
-      // std::cout << highScores[i] << '\n';
     }
   }
 
   writeHighScore(highScoreFile[stage]);
+
+  initShaders();
 }
 
 State *Result::update() {
@@ -142,8 +135,6 @@ State *Result::update() {
     next = new Title(window);
   }
   if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-    std::cout << isClear << '\n';
-    std::cout << score << '\n';
     next = new Play(window, stage);
   }
 
@@ -153,63 +144,39 @@ State *Result::update() {
   return next;
 }
 
-void Result::draw() {
+void Result::draw() const {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+  // draw clear or failure
   glActiveTexture(GL_TEXTURE0);
   if (isClear) {
-    glBindTexture(GL_TEXTURE_2D, resultTextures[0]);
+    glBindTexture(GL_TEXTURE_2D, resultTextures[TEXTURE_INDEX["clear"]]);
     DrawFigure::drawPlane(glm::vec3(3, -3.5, 0), glm::vec2(12, 4));
   } else {
-    glBindTexture(GL_TEXTURE_2D, resultTextures[1]);
+    glBindTexture(GL_TEXTURE_2D, resultTextures[TEXTURE_INDEX["failure"]]);
     DrawFigure::drawPlane(glm::vec3(2, -3.5, 0), glm::vec2(12, 4));
   }
 
+  // draw score
   drawScore(glm::vec2(6, -1), score);
 
+  // draw high scores
   for (int i = 0; i < 5; i++) {
     drawScore(glm::vec2(-2, -1 + i), highScores[i]);
     if (updateHighScore && highScores[i] == score) {
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, resultTextures[2]);
+      glBindTexture(GL_TEXTURE_2D, resultTextures[TEXTURE_INDEX["new"]]);
       DrawFigure::drawPlane(glm::vec3(0, -1 + i, 0),
                             glm::vec2(3, 3.39f / 3.0f));
     }
   }
 
   // draw guide
-  glBindTexture(GL_TEXTURE_2D, resultTextures[3]);
+  glBindTexture(GL_TEXTURE_2D, resultTextures[TEXTURE_INDEX["guide_result"]]);
   DrawFigure::drawPlane(glm::vec3(1, 4.5, 0), glm::vec2(12, 1));
 }
 
-void Result::initShaders() {
-  objectShader->use();
-
-  objectShader->use();
-  objectShader->setMat4("model", glm::mat4(1.0f));
-  objectShader->setMat4("view", camera->getView());
-  objectShader->setMat4("projection", camera->getProjection());
-
-  objectShader->setInt("material.diffuse", 0);
-  objectShader->setInt("material.specular", 1);
-
-  objectShader->setVec3("viewPos", camera->getPosition());
-  objectShader->setFloat("material.shininess", 32.0f);
-
-  objectShader->setVec3("dirLight.direction", 0.0f, 0.0f, 0.3f);
-  objectShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
-  objectShader->setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-  objectShader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-}
-
-void Result::updateShaders() {
-  objectShader->use();
-  objectShader->setMat4("model", glm::mat4(1.0f));
-  objectShader->setMat4("view", camera->getView());
-  objectShader->setMat4("projection", camera->getProjection());
-}
-
-void Result::drawScore(glm::vec2 pos, float score) {
+void Result::drawScore(const glm::vec2 pos, const float score) const {
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -242,7 +209,7 @@ void Result::drawScore(glm::vec2 pos, float score) {
   objectShader->setMat4("model", glm::mat4(1.0f));
 }
 
-void Result::loadHighScore(std::string filepath) {
+void Result::loadHighScore(const std::string filepath) {
   std::ifstream ifs(filepath);
   std::string str;
 
@@ -259,9 +226,36 @@ void Result::loadHighScore(std::string filepath) {
   }
 }
 
-void Result::writeHighScore(std::string filepath) {
+void Result::writeHighScore(const std::string filepath) const {
   std::ofstream ofs(filepath);
   for (int i = 0; i < 5; i++) {
     ofs << highScores[i] << '\n';
   }
+}
+
+void Result::initShaders() {
+  objectShader->use();
+
+  objectShader->use();
+  objectShader->setMat4("model", glm::mat4(1.0f));
+  objectShader->setMat4("view", camera->getView());
+  objectShader->setMat4("projection", camera->getProjection());
+
+  objectShader->setInt("material.diffuse", 0);
+  objectShader->setInt("material.specular", 1);
+
+  objectShader->setVec3("viewPos", camera->getPosition());
+  objectShader->setFloat("material.shininess", 32.0f);
+
+  objectShader->setVec3("dirLight.direction", 0.0f, 0.0f, 0.3f);
+  objectShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
+  objectShader->setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+  objectShader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+}
+
+void Result::updateShaders() {
+  objectShader->use();
+  objectShader->setMat4("model", glm::mat4(1.0f));
+  objectShader->setMat4("view", camera->getView());
+  objectShader->setMat4("projection", camera->getProjection());
 }

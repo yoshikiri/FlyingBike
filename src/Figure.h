@@ -58,7 +58,7 @@ public:
     glDeleteBuffers(1, &ibo);
   }
 
-  void draw() {
+  void draw() const {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
 

@@ -2,6 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <irrKlang/irrKlang.h>
+#include <map>
 #include <stb_image.h>
 
 #include "Camera.h"
@@ -10,28 +11,24 @@
 #include "Shader.h"
 
 namespace {
-auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
-    irrklang::createIrrKlangDevice());
-
+const float WIDTH = 800.0f;
+const float HEIGHT = 600.0f;
 const glm::vec3 cameraPositionLookDown(0.0f, 0.0f, 10.0f);
 const glm::vec3 cameraEye(0.0f, 0.0f, 0.0f);
 const glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
-const float WIDTH = 800.0f;
-const float HEIGHT = 600.0f;
 
-float curTime;
-float preTime;
-float curTime2;
-float preTime2;
-const float INTERVAL = 0.2f;
+auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
+    irrklang::createIrrKlangDevice());
 
 const int STAGE_NUM = 4;
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action,
-                  int mods) {
-  if (key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
-  }
-}
+// key input interval
+float curTime[2];
+float preTime[2];
+const float INTERVAL = 0.2f;
+
+std::map<std::string, int> TEXTURE_INDEX = {
+    {"title", 0}, {"stage", 1}, {"guide_title", 2}};
 
 unsigned int loadTexture(std::string filename, bool useAlpha = true) {
   stbi_set_flip_vertically_on_load(false);
@@ -67,34 +64,33 @@ unsigned int loadTexture(std::string filename, bool useAlpha = true) {
 
 Title::Title(GLFWwindow *window)
     : State(window),
-      lightShader(std::make_unique<Shader>("resource/shader/light.vert",
-                                           "resource/shader/light.frag")),
+
       objectShader(
           std::make_unique<Shader>("resource/shader/directionalLight.vert",
                                    "resource/shader/directionalLight.frag")),
       camera(std::make_unique<Camera>(cameraPositionLookDown, cameraEye,
                                       cameraUp, WIDTH, HEIGHT, true)),
-      numberTextures(std::make_unique<unsigned int[]>(10)),
-      titleTextures(std::make_unique<unsigned int[]>(3)), stage(0) {
+      titleTextures(std::make_unique<unsigned int[]>(TEXTURE_INDEX.size())),
+      numberTextures(std::make_unique<unsigned int[]>(10)), stage(0) {
 
+  // load textures
   for (int i = 0; i < 10; i++) {
     char buff[5];
     snprintf(buff, sizeof(buff), "%d", i);
-    numberTextures[i] = loadTexture(std::string("resource/image/number_result/") +
-                                    std::string(buff) + ".png");
+    numberTextures[i] =
+        loadTexture(std::string("resource/image/number_result/") +
+                    std::string(buff) + ".png");
   }
 
-  titleTextures[0] = loadTexture("resource/image/title.png");
-  titleTextures[1] = loadTexture("resource/image/guide_title.png");
-  titleTextures[2] = loadTexture("resource/image/stage.png");
+  for (auto p : TEXTURE_INDEX)
+    titleTextures[p.second] = loadTexture("resource/image/" + p.first + ".png");
 
   initShaders();
-  glfwSetKeyCallback(window, key_callback);
 
-  curTime = glfwGetTime();
-  preTime = -1;
-  curTime2 = glfwGetTime();
-  preTime2 = -1;
+  for (int i = 0; i < 2; i++) {
+    curTime[i] = glfwGetTime();
+    preTime[i] = -INTERVAL;
+  }
 }
 
 State *Title::update() {
@@ -102,26 +98,23 @@ State *Title::update() {
 
   // start game
   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
-    (*soundEngine)
-        ->play2D("resource/sound/se_start_play.ogg", false);
+    (*soundEngine)->play2D("resource/sound/se_start_play.ogg", false);
     next = new Play(window, stage);
 
     // stage select
   } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    curTime = glfwGetTime();
-    if (curTime > preTime + INTERVAL) {
-      (*soundEngine)
-          ->play2D("resource/sound/se_select_stage.ogg", false);
+    curTime[0] = glfwGetTime();
+    if (curTime[0] > preTime[0] + INTERVAL) {
+      (*soundEngine)->play2D("resource/sound/se_select_stage.ogg", false);
       stage = (stage + 1) % STAGE_NUM;
-      preTime = curTime;
+      preTime[0] = curTime[0];
     }
   } else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    curTime2 = glfwGetTime();
-    if (curTime2 > preTime2 + INTERVAL) {
-      (*soundEngine)
-          ->play2D("resource/sound/se_select_stage.ogg", false);
+    curTime[1] = glfwGetTime();
+    if (curTime[1] > preTime[1] + INTERVAL) {
+      (*soundEngine)->play2D("resource/sound/se_select_stage.ogg", false);
       stage = (stage + (STAGE_NUM - 1)) % STAGE_NUM;
-      preTime2 = curTime2;
+      preTime[1] = curTime[1];
     }
   }
 
@@ -131,7 +124,7 @@ State *Title::update() {
   return next;
 }
 
-void Title::draw() {
+void Title::draw() const {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   glActiveTexture(GL_TEXTURE1);
@@ -139,18 +132,18 @@ void Title::draw() {
 
   // draw title
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, titleTextures[0]);
+  glBindTexture(GL_TEXTURE_2D, titleTextures[TEXTURE_INDEX["title"]]);
   DrawFigure::drawPlane(glm::vec3(0.5, -4, 0), glm::vec2(15, 3));
-
-  // draw key guide
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, titleTextures[1]);
-  DrawFigure::drawPlane(glm::vec3(1.2, 3.5, 0), glm::vec2(11, 2));
 
   // draw stage
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, titleTextures[2]);
+  glBindTexture(GL_TEXTURE_2D, titleTextures[TEXTURE_INDEX["stage"]]);
   DrawFigure::drawPlane(glm::vec3(4.5, 0, 0), glm::vec2(6, 2));
+
+  // draw key guide
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, titleTextures[TEXTURE_INDEX["guide_title"]]);
+  DrawFigure::drawPlane(glm::vec3(1.2, 3.5, 0), glm::vec2(11, 2));
 
   // draw stage number
   glActiveTexture(GL_TEXTURE0);

@@ -69,7 +69,7 @@ bool Player::checkGoal(Goal &obj) {
 
 void Player::applyForce(glm::vec3 force) { acceleration += force / 1.0f; }
 
-void Player::draw() {
+void Player::draw() const {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, diffuseTextureID);
   glActiveTexture(GL_TEXTURE1);

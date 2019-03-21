@@ -9,7 +9,7 @@ Container::Container(glm::vec3 center, glm::vec3 length,
 
 void Container::update() {}
 
-void Container::draw() {
+void Container::draw() const {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, diffuseTextureID);
   glActiveTexture(GL_TEXTURE1);

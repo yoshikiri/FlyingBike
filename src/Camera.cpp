@@ -4,7 +4,7 @@
 
 Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float width,
                float height, bool isPerspective)
-    : position(position), target(target), up(up), width(width), height(height) {
+    : position(position), target(target), up(up), width(width), height(height), isPerspective(isPerspective) {
 
   fovy = 300.0f;
 
@@ -12,7 +12,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float width,
     projection =
         glm::perspective(glm::radians(fovy), width / height, 0.1f, 100.0f);
   else
-    projection = glm::ortho(-width, width, -height, height, 0.1f, 1000.0f);
+    projection = glm::ortho(-width, width, -height, height, 0.1f, 100.0f);
   view = glm::lookAt(position, target, up);
 }
 

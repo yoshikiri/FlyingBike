@@ -18,24 +18,23 @@ public:
   State *update() override;
 
 private:
-  std::unique_ptr<Shader> lightShader;
   std::unique_ptr<Shader> objectShader;
-  std::unique_ptr<Shader> textShader;
   std::unique_ptr<Camera> camera;
-  std::unique_ptr<unsigned int[]> numberTextures;
+
   std::unique_ptr<unsigned int[]> resultTextures;
-  const float score;
+  std::unique_ptr<unsigned int[]> numberTextures;
   std::unique_ptr<float[]> highScores;
+  const float score;
   const bool isClear;
   const unsigned int stage;
   bool updateHighScore;
 
-  void draw();
+  void draw() const;
+  void drawScore(const glm::vec2 pos, const float score) const;
+  void loadHighScore(const std::string filepath);
+  void writeHighScore(const std::string filepath) const;
   void initShaders();
   void updateShaders();
-  void drawScore(glm::vec2 pos, float score);
-  void loadHighScore(std::string filepath);
-  void writeHighScore(std::string filepath);
 };
 
 #endif

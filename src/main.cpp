@@ -24,9 +24,10 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  const float WIDTH = 800.0f;
-  const float HEIGHT = 600.0f;
-  Window window(WIDTH, HEIGHT, "TrackMaker");
+  const int WIDTH = 800;
+  const int HEIGHT = 600;
+  const char *GAME_TITLE = "Track Maker";
+  Window window(WIDTH, HEIGHT, GAME_TITLE);
 
   atexit(glfwTerminate);
 
@@ -38,12 +39,10 @@ int main() {
   glDepthFunc(GL_LESS);
   glEnable(GL_DEPTH_TEST);
 
-  //--------------------------------------------------------------------------//
   // play BGM
   auto soundEngine = std::make_unique<irrklang::ISoundEngine *>(
       irrklang::createIrrKlangDevice());
-  (*soundEngine)
-      ->play2D("resource/sound/kadentu_bgm.wav", true);
+  (*soundEngine)->play2D("resource/sound/kadentu_bgm.wav", true);
 
   // game state pointer
   State *state = new Title(window.getWindow());
