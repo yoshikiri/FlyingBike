@@ -2,7 +2,7 @@
 
 
 # TrackMaker
-This is a game to control the object moving toward the target and make the track (find the route) that can pass the checkpoint in the shortest time.   
+This is a game to control the object moving toward the target and make the track (find the route) that can pass the checkpoints in the shortest time.   
 [Demo play movie on YouTube](https://youtu.be/pc5txYNgkhs)
 
 # Dependency
